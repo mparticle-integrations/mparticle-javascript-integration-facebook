@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 //  Copyright 2015 mParticle, Inc.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,17 +28,12 @@
         constructor = function () {
             var self = this,
                 isInitialized = false,
-                forwarderSettings = null,
-                reportingService = null,
-                isTesting = false;
+                reportingService = null;
 
             self.name = name;
 
             function initForwarder(settings, service, testMode) {
-                forwarderSettings = settings;
                 reportingService = service;
-                isTesting = testMode;
-                d = document;
 
                 SupportedCommerceTypes = [
                     mParticle.ProductActionType.Checkout,
@@ -45,14 +41,14 @@
                     mParticle.ProductActionType.AddToCart,
                     mParticle.ProductActionType.AddToWishlist,
                     mParticle.ProductActionType.ViewDetail
-                ]
+                ];
 
                 try {
                     if (!testMode) {
                         !function (f, b, e, v, n, t, s) {
-                            if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments) }; if (!f._fbq) f._fbq = n;
+                            if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); }; if (!f._fbq) f._fbq = n;
                             n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0];
-                            s.parentNode.insertBefore(t, s)
+                            s.parentNode.insertBefore(t, s);
                         } (window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
                         fbq('init', settings.pixelId);
@@ -62,7 +58,7 @@
 
                     return 'Successfully initialized: ' + name;
 
-                } 
+                }
                 catch (e) {
                     return 'Can\'t initialize forwarder: ' + name + ':' + e;
                 }
@@ -79,11 +75,11 @@
                     if (event.EventDataType == MessageType.PageView) {
                         reportEvent = true;
                         logPageView(event);
-                    } 
+                    }
                     else if (event.EventDataType == MessageType.PageEvent) {
                         reportEvent = true;
                         logPageEvent(event);
-                    } 
+                    }
                     else if (event.EventDataType == MessageType.Commerce) {
                         reportEvent = logCommerceEvent(event);
                     }
@@ -93,7 +89,7 @@
                     }
 
                     return 'Successfully sent to forwarder ' + name;
-                } 
+                }
                 catch (error) {
                     return 'Can\'t send to forwarder: ' + name + ' ' + error;
                 }
@@ -109,11 +105,11 @@
                     var params = {};
 
                     if (event.CurrencyCode) {
-                        params["currency"] = event.CurrencyCode;
+                        params['currency'] = event.CurrencyCode;
                     }
 
                     if (event.EventName) {
-                        params["content_name"] = event.EventName;
+                        params['content_name'] = event.EventName;
                     }
 
                     var productSkus = event.ProductAction.ProductList.reduce(function (arr, curr) {
@@ -124,62 +120,62 @@
                     }, []);
 
                     if (productSkus && productSkus.length > 0) {
-                        params["content_ids"] = productSkus;
+                        params['content_ids'] = productSkus;
                     }
 
                     if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToWishlist ||
                         event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout) {
                         var eventCategory = getEventCategoryString(event);
                         if (eventCategory) {
-                            params["content_category"] = eventCategory;
+                            params['content_category'] = eventCategory;
                         }
                     }
 
                     if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart ||
                         event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToWishlist ||
                         event.ProductAction.ProductActionType == mParticle.ProductActionType.ViewDetail) {
-                        
-                        var totalValue = event.ProductAction.ProductList.reduce(function(sum, product){                       
+
+                        var totalValue = event.ProductAction.ProductList.reduce(function(sum, product){
                             if (isNumeric(product.Price) && isNumeric(product.Quantity)) {
                                 sum += product.Price * product.Quantity;
                             }
                             return sum;
-                        }, 0)
+                        }, 0);
 
-                        params["value"] = totalValue;
+                        params['value'] = totalValue;
 
                         if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToWishlist){
-                            eventName = "AddToWishlist";
+                            eventName = 'AddToWishlist';
                         }
                         else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
-                            eventName = "AddToCart";
+                            eventName = 'AddToCart';
                         }
                         else{
-                            eventName = "ViewContent";
+                            eventName = 'ViewContent';
                         }
 
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ||
                              event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
 
-                        eventName = event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ? "InitiateCheckout" : "Purchase";
+                        eventName = event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ? 'InitiateCheckout' : 'Purchase';
 
                         if (event.ProductAction.TotalAmount) {
-                            params["value"] = event.ProductAction.TotalAmount;
+                            params['value'] = event.ProductAction.TotalAmount;
                         }
 
-                        var num_items = event.ProductAction.ProductList.reduce(function(sum, product){                       
+                        var num_items = event.ProductAction.ProductList.reduce(function(sum, product){
                             if (isNumeric(product.Quantity)) {
                                 sum += product.Quantity;
                             }
                             return sum;
-                        }, 0)
-                        params["num_items"] = num_items
+                        }, 0);
+                        params['num_items'] = num_items;
                     }
 
                     if (eventName) {
-                        fbq('track', eventName, params)
-                    } 
+                        fbq('track', eventName, params);
+                    }
                     else {
                         return false;
                     }
@@ -190,17 +186,17 @@
                 return false;
             }
 
-           function logPageView(event) {
-                logPageEvent(event, "Viewed " + event.EventName);
+            function logPageView(event) {
+                logPageEvent(event, 'Viewed ' + event.EventName);
             }
 
             function logPageEvent(event, eventName) {
                 var params = cloneEventAttributes(event);
                 eventName = eventName || event.EventName;
                 if (event.EventName) {
-                    params["content_name"] = event.EventName;
+                    params['content_name'] = event.EventName;
                 }
-                fbq('trackCustom', eventName || "customEvent", params);
+                fbq('trackCustom', eventName || 'customEvent', params);
             }
 
             function cloneEventAttributes(event) {
@@ -208,8 +204,9 @@
                 if (event && event.Attributes) {
                     try {
                         attr = JSON.parse(JSON.stringify(event.Attributes));
-                    } 
+                    }
                     catch (e) {
+                        //
                     }
                 }
                 return attr;
@@ -226,7 +223,7 @@
                 if (event.EventDataType == MessageType.Commerce) {
                     enumTypeValues = event.EventCategory ? mParticle.CommerceEventType : mParticle.ProductActionType;
                     enumValue = event.EventCategory || event.ProductAction.ProductActionType;
-                } 
+                }
                 else {
                     enumTypeValues = mParticle.EventType;
                     enumValue = event.EventCategory;
