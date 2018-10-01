@@ -216,6 +216,17 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.should.have.property('eventName', 'customEvent');
             done();
         });
+
+        it('should log event attributes properly', function (done) {
+            mParticle.forwarder.process({
+                EventName: 'logevent',
+                EventDataType: MessageType.PageEvent,
+                EventAttributes: {foo: 'bar'}
+            });
+
+            window.fbqObj.params.should.have.property('foo', 'bar');
+            done();
+        });
     });
 
     describe('Commerce Events', function () {

@@ -201,9 +201,9 @@
 
             function cloneEventAttributes(event) {
                 var attr = {};
-                if (event && event.Attributes) {
+                if (event && event.EventAttributes) {
                     try {
-                        attr = JSON.parse(JSON.stringify(event.Attributes));
+                        attr = JSON.parse(JSON.stringify(event.EventAttributes));
                     }
                     catch (e) {
                         //
