@@ -272,7 +272,7 @@ describe('Facebook Forwarder', function () {
             done();
         });
 
-        it.only('should log Checkout event', function (done) {
+        it('should log Checkout event', function (done) {
             mParticle.forwarder.process({
                 EventName: 'eCommerce - Checkout',
                 EventCategory: CommerceEventType.ProductCheckout,
