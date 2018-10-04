@@ -1,6 +1,4 @@
 /* eslint-disable no-undef */
-
-
 describe('Facebook Forwarder', function () {
     var MessageType = {
             SessionStart: 1,
@@ -230,11 +228,14 @@ describe('Facebook Forwarder', function () {
     });
 
     describe('Commerce Events', function () {
-
         it('should log Purchase event', function (done) {
             mParticle.forwarder.process({
                 EventName: 'eCommerce - Purchase',
                 EventDataType: MessageType.Commerce,
+                EventAttributes: {
+                    eventAttr1: 'value1',
+                    eventAttr2: 'value2'
+                },
                 ProductAction: {
                     ProductActionType: ProductActionType.Purchase,
                     ProductList: [
@@ -265,16 +266,24 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - Purchase');
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
             window.fbqObj.params.should.have.property('num_items', 1);
+            window.fbqObj.params.should.have.property('eventAttr1', 'value1');
+            window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+
             done();
         });
 
-        it('should log Checkout event', function (done) {
+        it.only('should log Checkout event', function (done) {
             mParticle.forwarder.process({
                 EventName: 'eCommerce - Checkout',
                 EventCategory: CommerceEventType.ProductCheckout,
                 EventDataType: MessageType.Commerce,
+                EventAttributes: {
+                    eventAttr1: 'value1',
+                    eventAttr2: 'value2'
+                },
                 ProductAction: {
                     ProductActionType: ProductActionType.Checkout,
+                    CheckoutStep: 1,
                     ProductList: [
                         {
                             Sku: '12345',
@@ -323,7 +332,9 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_category', 'ProductCheckout');
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - Checkout');
             window.fbqObj.params.should.have.property('content_ids', ['12345', '22', '333']);
+            window.fbqObj.params.should.have.property('checkout_step', 1);
             window.fbqObj.params.should.have.property('num_items', 9);
+
             done();
         });
 
@@ -419,11 +430,53 @@ describe('Facebook Forwarder', function () {
             done();
         });
 
+        it('should log RemoveFromCart event', function (done) {
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - RemoveFromCart',
+                EventCategory: CommerceEventType.ProductRemoveFromCart,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.RemoveFromCart,
+                    ProductList: [
+                        {
+                            Sku: '12345',
+                            Name: 'iPhone 6',
+                            Category: 'Phones',
+                            Brand: 'iPhone',
+                            Variant: '6',
+                            Price: 400,
+                            CouponCode: null,
+                            Quantity: 1
+                        }
+                    ],
+                    TransactionId: 123,
+                    Affiliation: 'my-affiliation',
+                    TotalAmount: 450,
+                    TaxAmount: 40,
+                    ShippingAmount: 10
+                },
+                CurrencyCode: 'USD'
+            });
+
+            checkBasicProperties('trackCustom');
+            window.fbqObj.should.have.property('eventName', 'RemoveFromCart');
+            window.fbqObj.params.should.have.property('value', 400);
+            window.fbqObj.params.should.have.property('currency', 'USD');
+            window.fbqObj.params.should.have.property('content_name', 'eCommerce - RemoveFromCart');
+            window.fbqObj.params.should.have.property('content_ids', ['12345']);
+
+            done();
+        });
+
         it('should log AddToWishList event with correct total value', function (done) {
             mParticle.forwarder.process({
                 EventName: 'eCommerce - AddToWishlist',
                 EventCategory: CommerceEventType.ProductAddToWishlist,
                 EventDataType: MessageType.Commerce,
+                EventAttributes: {
+                    eventAttr1: 'value1',
+                    eventAttr2: 'value2'
+                },
                 ProductAction: {
                     ProductActionType: ProductActionType.AddToWishlist,
                     ProductList: [
@@ -471,6 +524,9 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('currency', 'USD');
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - AddToWishlist');
             window.fbqObj.params.should.have.property('content_ids', ['12345', '888', '666']);
+            window.fbqObj.params.should.have.property('eventAttr1', 'value1');
+            window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+
             done();
         });
 
@@ -479,6 +535,10 @@ describe('Facebook Forwarder', function () {
                 EventName: 'eCommerce - AddToWishlist',
                 EventCategory: CommerceEventType.ProductAddToWishlist,
                 EventDataType: MessageType.Commerce,
+                EventAttributes: {
+                    eventAttr1: 'value1',
+                    eventAttr2: 'value2'
+                },
                 ProductAction: {
                     ProductActionType: ProductActionType.AddToWishlist,
                     ProductList: [
@@ -509,6 +569,9 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_category', 'ProductAddToWishlist');
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - AddToWishlist');
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
+            window.fbqObj.params.should.have.property('eventAttr1', 'value1');
+            window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+
             done();
         });
 
@@ -517,6 +580,10 @@ describe('Facebook Forwarder', function () {
                 EventName: 'eCommerce - ViewDetail',
                 EventCategory: CommerceEventType.ProductViewDetail,
                 EventDataType: MessageType.Commerce,
+                EventAttributes: {
+                    eventAttr1: 'value1',
+                    eventAttr2: 'value2'
+                },
                 ProductAction: {
                     ProductActionType: ProductActionType.ViewDetail,
                     ProductList: [
@@ -546,6 +613,9 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('currency', 'USD');
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - ViewDetail');
             window.fbqObj.params.should.have.property('content_ids', ['145']);
+            window.fbqObj.params.should.have.property('eventAttr1', 'value1');
+            window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+
             done();
         });
 
@@ -553,6 +623,10 @@ describe('Facebook Forwarder', function () {
             mParticle.forwarder.process({
                 EventName: 'MyeCommerce',
                 EventDataType: MessageType.Commerce,
+                EventAttributes: {
+                    eventAttr1: 'value1',
+                    eventAttr2: 'value2'
+                },
                 ProductAction: {
                     ProductActionType: ProductActionType.AddToWishlist,
                     ProductList: [
@@ -583,6 +657,8 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_category', 'AddToWishlist');
             window.fbqObj.params.should.have.property('content_name', 'MyeCommerce');
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
+            window.fbqObj.params.should.have.property('eventAttr1', 'value1');
+            window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             done();
         });
 
