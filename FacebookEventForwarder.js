@@ -180,16 +180,14 @@
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.RemoveFromCart) {
                         eventName = 'RemoveFromCart';
 
-                        totalValue = event.ProductAction.ProductList.reduce(function(sum, product){
-                            if (isNumeric(product.Price) && isNumeric(product.Quantity)) {
-                                sum += product.Price * product.Quantity;
+                        totalValue = event.ProductAction.ProductList.reduce(function(sum, product) {
+                            if (isNumeric(product.TotalAmount)) {
+                                sum += product.TotalAmount;
                             }
                             return sum;
                         }, 0);
 
-                        if (event.ProductAction.TotalAmount) {
-                            params['value'] = totalValue;
-                        }
+                        params['value'] = totalValue;
 
                         fbq('trackCustom', eventName || 'customEvent', params);
                         return true;

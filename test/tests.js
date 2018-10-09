@@ -178,7 +178,6 @@ describe('Facebook Forwarder', function () {
     });
 
     describe('Page Views', function () {
-
         it('should log page view', function (done) {
             mParticle.forwarder.process({
                 EventName: 'testevent',
@@ -446,12 +445,12 @@ describe('Facebook Forwarder', function () {
                             Variant: '6',
                             Price: 400,
                             CouponCode: null,
-                            Quantity: 1
+                            Quantity: 1,
+                            TotalAmount: 400
                         }
                     ],
                     TransactionId: 123,
                     Affiliation: 'my-affiliation',
-                    TotalAmount: 450,
                     TaxAmount: 40,
                     ShippingAmount: 10
                 },
