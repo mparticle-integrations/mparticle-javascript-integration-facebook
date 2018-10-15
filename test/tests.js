@@ -429,7 +429,46 @@ describe('Facebook Forwarder', function () {
             done();
         });
 
-        it('should log RemoveFromCart event', function (done) {
+        it('should log RemoveFromCart event and use TotalAmount when present on ProductAction', function (done) {
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - RemoveFromCart',
+                EventCategory: CommerceEventType.ProductRemoveFromCart,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.RemoveFromCart,
+                    ProductList: [
+                        {
+                            Sku: '12345',
+                            Name: 'iPhone 6',
+                            Category: 'Phones',
+                            Brand: 'iPhone',
+                            Variant: '6',
+                            Price: 200,
+                            CouponCode: null,
+                            Quantity: 1,
+                            TotalAmount: 200
+                        }
+                    ],
+                    TransactionId: 123,
+                    Affiliation: 'my-affiliation',
+                    TaxAmount: 40,
+                    ShippingAmount: 10,
+                    TotalAmount: 205
+                },
+                CurrencyCode: 'USD'
+            });
+
+            checkBasicProperties('trackCustom');
+            window.fbqObj.should.have.property('eventName', 'RemoveFromCart');
+            window.fbqObj.params.should.have.property('value', 205);
+            window.fbqObj.params.should.have.property('currency', 'USD');
+            window.fbqObj.params.should.have.property('content_name', 'eCommerce - RemoveFromCart');
+            window.fbqObj.params.should.have.property('content_ids', ['12345']);
+
+            done();
+        });
+
+        it('should log RemoveFromCart event and calculate TotalAmount if total amount is not present on ProductAction', function (done) {
             mParticle.forwarder.process({
                 EventName: 'eCommerce - RemoveFromCart',
                 EventCategory: CommerceEventType.ProductRemoveFromCart,

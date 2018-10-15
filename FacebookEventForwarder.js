@@ -180,12 +180,20 @@
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.RemoveFromCart) {
                         eventName = 'RemoveFromCart';
 
-                        totalValue = event.ProductAction.ProductList.reduce(function(sum, product) {
-                            if (isNumeric(product.TotalAmount)) {
-                                sum += product.TotalAmount;
-                            }
-                            return sum;
-                        }, 0);
+                        // remove from cart can be performed in 1 of 2 ways:
+                        // 1. mParticle.eCommerce.logProductEvent(), which contains event.ProductAction.TotalAmount
+                        // 2. mParticle.eCommerce.Cart.remove(), which does not contain event.ProductAction.TotalAmount
+                        // when there is no TotalAmount, a manual calculation must be done
+                        if (event.ProductAction.TotalAmount) {
+                            totalValue = event.ProductAction.TotalAmount;
+                        } else {
+                            totalValue = event.ProductAction.ProductList.reduce(function(sum, product) {
+                                if (isNumeric(product.TotalAmount)) {
+                                    sum += product.TotalAmount;
+                                }
+                                return sum;
+                            }, 0);
+                        }
 
                         params['value'] = totalValue;
 
