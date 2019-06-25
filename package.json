@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "browser": "dist/FacebookEventForwarder.js",
   "files": [
-    "dist/LeanplumAnalyticsEventForwarder.js"
+    "dist/FacebookEventForwarder.js"
   ],
   "scripts": {
     "build": "rollup --config rollup.config.js",
