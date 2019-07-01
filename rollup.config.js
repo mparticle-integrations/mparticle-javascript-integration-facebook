@@ -21,7 +21,7 @@ export default [
     {
         input: 'src/FacebookEventForwarder.js',
         output: {
-            file: 'dist/FacebookEventForwarder.js',
+            file: 'dist/FacebookEventForwarder.iife.js',
             format: 'iife',
             exports: 'named',
             name: 'mpFacebookKit',
@@ -37,7 +37,7 @@ export default [
     {
         input: 'src/FacebookEventForwarder.js',
         output: {
-            file: 'npm/FacebookEventForwarder.js',
+            file: 'dist/FacebookEventForwarder.common.js',
             format: 'cjs',
             exports: 'named',
             name: 'mpFacebookKit',
