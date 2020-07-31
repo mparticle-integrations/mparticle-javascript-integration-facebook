@@ -108,7 +108,12 @@
                         params = cloneEventAttributes(event);
 
                     if (event.CurrencyCode) {
-                        params['currency'] = event.CurrencyCode;
+                        if (event.CurrencyCode === ""){
+                            params['currency'] = 'USD'; // inject USD if CurrencyCode is empty
+                        }
+                        else {
+                            params['currency'] = event.CurrencyCode;
+                        }
                     }
 
                     if (event.EventName) {
