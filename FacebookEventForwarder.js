@@ -122,6 +122,9 @@ var mpFacebookKit = (function (exports) {
                       if (event.CurrencyCode) {
                           params['currency'] = event.CurrencyCode;
                       }
+                      else{
+                          params['currency'] = 'USD'; // Inject CurrencyCode if it doesn't exist
+                      }
 
                       if (event.EventName) {
                           params['content_name'] = event.EventName;
