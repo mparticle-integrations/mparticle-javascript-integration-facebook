@@ -107,7 +107,7 @@
                         totalValue,
                         params = cloneEventAttributes(event);
 
-                    params['currency'] = event.CurrencyCode || 'USD'
+                    params['currency'] = event.CurrencyCode || 'USD';
 
                     if (event.EventName) {
                         params['content_name'] = event.EventName;
