@@ -9,6 +9,29 @@ describe('Facebook Forwarder', function () {
             OptOut: 6,
             Commerce: 16
         },
+        IdentityType = {
+            Other: 0,
+            CustomerId: 1,
+            Facebook: 2,
+            Twitter: 3,
+            Google: 4,
+            Microsoft: 5,
+            Yahoo: 6,
+            Email: 7,
+            FacebookCustomAudienceId: 9,
+            Other2: 10,
+            Other3: 11,
+            Other4: 12,
+            Other5: 13,
+            Other6: 14,
+            Other7: 15,
+            Other8: 16,
+            Other9: 17,
+            Other10: 18,
+            MobileNumber: 19,
+            PhoneNumber2: 20,
+            PhoneNumber3: 21,
+        },
         EventType = {
             Unknown: 0,
             Navigation: 1,
@@ -72,7 +95,7 @@ describe('Facebook Forwarder', function () {
 
     function MPMock() {
         var self = this;
-        var calledMethods = ['track'];
+        var calledMethods = ['track', 'init'];
 
         for (var i = 0; i < calledMethods.length; i++) {
             this[calledMethods[i] + 'Called'] = false;
@@ -117,6 +140,39 @@ describe('Facebook Forwarder', function () {
     });
 
     describe('Events handled by this forwarder', function () {
+
+        it('should initialize basic parameters', function (done) {
+            mParticle.forwarder.init({
+                pixelCode: 'mock-pixel-code',
+                externalUserIdentityType: 'CustomerId',
+            }, reportService.cb, false);
+
+            window.fbqObj.should.have.property('initCalled', true);
+            window.fbqObj.should.have.property('params', {});
+
+            done();
+        });
+
+        it('should initialize with externalUserIdentityType', function (done) {
+            const userIdentities = [
+                {
+                    Type: 1,
+                    Identity: 'mock-customer-id',
+                },
+            ];
+
+            mParticle.forwarder.init({
+                pixelCode: 'mock-pixel-code',
+                externalUserIdentityType: 'CustomerId',
+            }, reportService.cb, false, null, null, userIdentities);
+
+            window.fbqObj.should.have.property('initCalled', true);
+            window.fbqObj.should.have.property('params', {
+                external_id: 'mock-customer-id',
+            });
+
+            done();
+        });
 
         it('should log page event', function (done) {
             mParticle.forwarder.process({

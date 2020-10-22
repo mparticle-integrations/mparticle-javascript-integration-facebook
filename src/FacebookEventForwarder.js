@@ -25,6 +25,29 @@
             OptOut: 6,
             Commerce: 16
         },
+        IdentityType = {
+            Other: 0,
+            CustomerId: 1,
+            Facebook: 2,
+            Twitter: 3,
+            Google: 4,
+            Microsoft: 5,
+            Yahoo: 6,
+            Email: 7,
+            FacebookCustomAudienceId: 9,
+            Other2: 10,
+            Other3: 11,
+            Other4: 12,
+            Other5: 13,
+            Other6: 14,
+            Other7: 15,
+            Other8: 16,
+            Other9: 17,
+            Other10: 18,
+            MobileNumber: 19,
+            PhoneNumber2: 20,
+            PhoneNumber3: 21,
+        },
         SupportedCommerceTypes = [],
         constructor = function () {
             var self = this,
@@ -33,7 +56,7 @@
 
             self.name = name;
 
-            function initForwarder(settings, service, testMode) {
+            function initForwarder(settings, service, testMode, trackerId, userAttributes, userIdentities) {
                 reportingService = service;
 
                 SupportedCommerceTypes = [
@@ -53,7 +76,22 @@
                             s.parentNode.insertBefore(t, s);
                         } (window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
-                        fbq('init', settings.pixelId);
+                        var visitorData = {};
+
+                        if(settings.externalUserIdentityType && userIdentities && userIdentities.length > 0) {
+                            var selectedType = IdentityType[settings.externalUserIdentityType];
+                            var selectedIdentity = userIdentities.filter(function (identityElement) {
+                                if (identityElement.Type === selectedType) {
+                                    return identityElement.Identity;
+                                }
+                            })
+
+                            if (selectedIdentity.length > 0) {
+                                visitorData['external_id'] = selectedIdentity[0].Identity;
+                            }
+                        }
+
+                        fbq('init', settings.pixelId, visitorData);
                     }
 
                     isInitialized = true;
