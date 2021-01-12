@@ -5,22 +5,6 @@ export default [
     {
         input: 'src/FacebookEventForwarder.js',
         output: {
-            file: 'FacebookEventForwarder.js',
-            format: 'iife',
-            exports: 'named',
-            name: 'mpFacebookKit',
-            strict: false
-        },
-        plugins: [
-            resolve({
-                browser: true
-            }),
-            commonjs()
-        ]
-    },
-    {
-        input: 'src/FacebookEventForwarder.js',
-        output: {
             file: 'dist/FacebookEventForwarder.iife.js',
             format: 'iife',
             exports: 'named',
