@@ -143,8 +143,8 @@
 
                     var eventName,
                         totalValue,
-                        params = cloneEventAttributes(event);
-
+                        params = createParameters(event),
+                        eventID = createEventId(event);
                     params['currency'] = event.CurrencyCode || 'USD';
 
                     if (event.EventName) {
@@ -234,12 +234,12 @@
 
                         params['value'] = totalValue;
 
-                        fbq('trackCustom', eventName || 'customEvent', params);
+                        fbq('trackCustom', eventName || 'customEvent', params, eventID);
                         return true;
                     }
 
                     if (eventName) {
-                        fbq('track', eventName, params);
+                        fbq('track', eventName, params, eventID);
                     }
                     else {
                         return false;
@@ -256,15 +256,17 @@
             }
 
             function logPageEvent(event, eventName) {
-                var params = cloneEventAttributes(event);
+                var params = createParameters(event);
+                var eventID = createEventId(event);
+
                 eventName = eventName || event.EventName;
                 if (event.EventName) {
                     params['content_name'] = event.EventName;
                 }
-                fbq('trackCustom', eventName || 'customEvent', params);
+                fbq('trackCustom', eventName || 'customEvent', params, eventID);
             }
 
-            function cloneEventAttributes(event) {
+            function createParameters(event) {
                 var attr = {};
                 if (event && event.EventAttributes) {
                     try {
@@ -304,6 +306,13 @@
                 }
 
                 return null;
+            }
+
+            // https://developers.facebook.com/docs/marketing-api/conversions-api/deduplicate-pixel-and-server-events#event-deduplication-options
+            function createEventId(event) {
+                return {
+                    eventID: event.SourceMessageId || null
+                }
             }
 
             this.init = initForwarder;

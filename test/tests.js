@@ -105,10 +105,11 @@ describe('Facebook Forwarder', function () {
             self[attr] = true;
         }
 
-        function fbq(fnName, eventname, params) {
+        function fbq(fnName, eventname, params, eventData) {
             setCalledAttributes(fnName + 'Called');
             self.eventName = eventname;
             self.params = params;
+            self.eventData = eventData;
         }
 
         return {
@@ -117,6 +118,7 @@ describe('Facebook Forwarder', function () {
         };
     }
 
+    var SOURCE_MESSAGE_ID = 'Source Message Id Test';
     function checkBasicProperties(fnName) {
         window.fbqObj.should.have.property(fnName + 'Called', true);
         window.fbqObj.should.have.property('eventName');
@@ -244,6 +246,20 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.should.have.property('eventName', 'Viewed testevent');
             done();
         });
+
+        it('should log page view with event id when passed', function (done) {
+            mParticle.forwarder.process({
+                EventName: 'testevent',
+                EventDataType: MessageType.PageView,
+                SourceMessageId: SOURCE_MESSAGE_ID
+            });
+
+            checkBasicProperties('trackCustom');
+            window.fbqObj.should.have.property('eventName', 'Viewed testevent');
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID)
+
+            done();
+        });
     });
 
     describe('Page Events', function () {
@@ -280,6 +296,17 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('foo', 'bar');
             done();
         });
+
+        it('should log event id when passed properly', function (done) {
+            mParticle.forwarder.process({
+                EventName: 'logevent',
+                EventDataType: MessageType.PageEvent,
+                SourceMessageId: SOURCE_MESSAGE_ID
+            });
+
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID)
+            done();
+        });
     });
 
     describe('Commerce Events', function () {
@@ -311,7 +338,8 @@ describe('Facebook Forwarder', function () {
                     TaxAmount: 40,
                     ShippingAmount: 10
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('track');
@@ -323,6 +351,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('num_items', 1);
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
 
             done();
         });
@@ -377,7 +406,8 @@ describe('Facebook Forwarder', function () {
                     TaxAmount: 40,
                     ShippingAmount: 10
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('track');
@@ -389,6 +419,8 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_ids', ['12345', '22', '333']);
             window.fbqObj.params.should.have.property('checkout_step', 1);
             window.fbqObj.params.should.have.property('num_items', 9);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+
 
             done();
         });
@@ -418,7 +450,9 @@ describe('Facebook Forwarder', function () {
                     TaxAmount: 40,
                     ShippingAmount: 10
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
+
             });
 
             checkBasicProperties('track');
@@ -427,6 +461,8 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('currency', 'USD');
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - AddToCart');
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+
             done();
         });
 
@@ -473,7 +509,8 @@ describe('Facebook Forwarder', function () {
                     TransactionId: 123,
                     Affiliation: 'my-affiliation'
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('track');
@@ -482,6 +519,8 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('currency', 'USD');
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - AddToCart');
             window.fbqObj.params.should.have.property('content_ids', ['12345', '888', '666']);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+
             done();
         });
 
@@ -511,7 +550,8 @@ describe('Facebook Forwarder', function () {
                     ShippingAmount: 10,
                     TotalAmount: 205
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('trackCustom');
@@ -520,6 +560,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('currency', 'USD');
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - RemoveFromCart');
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
 
             done();
         });
@@ -549,7 +590,8 @@ describe('Facebook Forwarder', function () {
                     TaxAmount: 40,
                     ShippingAmount: 10
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('trackCustom');
@@ -558,6 +600,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('currency', 'USD');
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - RemoveFromCart');
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
 
             done();
         });
@@ -609,7 +652,8 @@ describe('Facebook Forwarder', function () {
                     TransactionId: 123,
                     Affiliation: 'my-affiliation'
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('track');
@@ -620,6 +664,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_ids', ['12345', '888', '666']);
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
 
             done();
         });
@@ -653,7 +698,8 @@ describe('Facebook Forwarder', function () {
                     TaxAmount: 40,
                     ShippingAmount: 10
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('track');
@@ -665,6 +711,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
 
             done();
         });
@@ -698,7 +745,8 @@ describe('Facebook Forwarder', function () {
                     TaxAmount: 40,
                     ShippingAmount: 10
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('track');
@@ -709,6 +757,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_ids', ['145']);
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
 
             done();
         });
@@ -741,7 +790,8 @@ describe('Facebook Forwarder', function () {
                     TaxAmount: 40,
                     ShippingAmount: 10
                 },
-                CurrencyCode: 'USD'
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID
             });
 
             checkBasicProperties('track');
@@ -753,6 +803,8 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+
             done();
         });
 
