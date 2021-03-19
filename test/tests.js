@@ -251,7 +251,7 @@ describe('Facebook Forwarder', function () {
             mParticle.forwarder.process({
                 EventName: 'testevent',
                 EventDataType: MessageType.PageView,
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('trackCustom');
@@ -301,7 +301,7 @@ describe('Facebook Forwarder', function () {
             mParticle.forwarder.process({
                 EventName: 'logevent',
                 EventDataType: MessageType.PageEvent,
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID)
@@ -339,7 +339,7 @@ describe('Facebook Forwarder', function () {
                     ShippingAmount: 10
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('track');
@@ -407,7 +407,7 @@ describe('Facebook Forwarder', function () {
                     ShippingAmount: 10
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('track');
@@ -451,7 +451,7 @@ describe('Facebook Forwarder', function () {
                     ShippingAmount: 10
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
 
             });
 
@@ -510,7 +510,7 @@ describe('Facebook Forwarder', function () {
                     Affiliation: 'my-affiliation'
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('track');
@@ -551,7 +551,7 @@ describe('Facebook Forwarder', function () {
                     TotalAmount: 205
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('trackCustom');
@@ -591,7 +591,7 @@ describe('Facebook Forwarder', function () {
                     ShippingAmount: 10
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('trackCustom');
@@ -653,7 +653,7 @@ describe('Facebook Forwarder', function () {
                     Affiliation: 'my-affiliation'
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('track');
@@ -699,7 +699,7 @@ describe('Facebook Forwarder', function () {
                     ShippingAmount: 10
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('track');
@@ -746,7 +746,7 @@ describe('Facebook Forwarder', function () {
                     ShippingAmount: 10
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('track');
@@ -791,7 +791,7 @@ describe('Facebook Forwarder', function () {
                     ShippingAmount: 10
                 },
                 CurrencyCode: 'USD',
-                SourceMessageId: SOURCE_MESSAGE_ID
+                SourceMessageId: SOURCE_MESSAGE_ID,
             });
 
             checkBasicProperties('track');
