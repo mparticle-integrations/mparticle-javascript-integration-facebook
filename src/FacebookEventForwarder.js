@@ -143,7 +143,7 @@
 
                     var eventName,
                         totalValue,
-                        params = createParameters(event),
+                        params = cloneEventAttributes(event),
                         eventID = createEventId(event);
                     params['currency'] = event.CurrencyCode || 'USD';
 
@@ -256,7 +256,7 @@
             }
 
             function logPageEvent(event, eventName) {
-                var params = createParameters(event);
+                var params = cloneEventAttributes(event);
                 var eventID = createEventId(event);
 
                 eventName = eventName || event.EventName;
@@ -266,7 +266,7 @@
                 fbq('trackCustom', eventName || 'customEvent', params, eventID);
             }
 
-            function createParameters(event) {
+            function cloneEventAttributes(event) {
                 var attr = {};
                 if (event && event.EventAttributes) {
                     try {
