@@ -11,6 +11,16 @@ function isObject(val) {
   return val != null && typeof val === 'object' && Array.isArray(val) === false;
 }
 
+var isobject = /*#__PURE__*/Object.freeze({
+  'default': isObject
+});
+
+function getCjsExportFromNamespace (n) {
+	return n && n['default'] || n;
+}
+
+var isobject$1 = getCjsExportFromNamespace(isobject);
+
 /* eslint-disable no-undef */
 //  Copyright 2015 mParticle, Inc.
 //
@@ -156,8 +166,8 @@ function isObject(val) {
 
                     var eventName,
                         totalValue,
-                        params = cloneEventAttributes(event);
-
+                        params = cloneEventAttributes(event),
+                        eventID = createEventId(event);
                     params['currency'] = event.CurrencyCode || 'USD';
 
                     if (event.EventName) {
@@ -247,12 +257,12 @@ function isObject(val) {
 
                         params['value'] = totalValue;
 
-                        fbq('trackCustom', eventName || 'customEvent', params);
+                        fbq('trackCustom', eventName || 'customEvent', params, eventID);
                         return true;
                     }
 
                     if (eventName) {
-                        fbq('track', eventName, params);
+                        fbq('track', eventName, params, eventID);
                     }
                     else {
                         return false;
@@ -270,11 +280,13 @@ function isObject(val) {
 
             function logPageEvent(event, eventName) {
                 var params = cloneEventAttributes(event);
+                var eventID = createEventId(event);
+
                 eventName = eventName || event.EventName;
                 if (event.EventName) {
                     params['content_name'] = event.EventName;
                 }
-                fbq('trackCustom', eventName || 'customEvent', params);
+                fbq('trackCustom', eventName || 'customEvent', params, eventID);
             }
 
             function cloneEventAttributes(event) {
@@ -319,6 +331,13 @@ function isObject(val) {
                 return null;
             }
 
+            // https://developers.facebook.com/docs/marketing-api/conversions-api/deduplicate-pixel-and-server-events#event-deduplication-options
+            function createEventId(event) {
+                return {
+                    eventID: event.SourceMessageId || null
+                }
+            }
+
             this.init = initForwarder;
             this.process = processEvent;
         };
@@ -329,16 +348,16 @@ function isObject(val) {
 
     function register(config) {
         if (!config) {
-            window.console.log('You must pass a config object to register the kit ' + name);
+            console.log('You must pass a config object to register the kit ' + name);
             return;
         }
 
-        if (!isObject(config)) {
-            window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
+        if (!isobject$1(config)) {
+            console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
         }
 
-        if (isObject(config.kits)) {
+        if (isobject$1(config.kits)) {
             config.kits[name] = {
                 constructor: constructor
             };
@@ -348,15 +367,17 @@ function isObject(val) {
                 constructor: constructor
             };
         }
-        window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+        console.log('Successfully registered ' + name + ' to your mParticle configuration');
     }
 
-    if (window && window.mParticle && window.mParticle.addForwarder) {
-        window.mParticle.addForwarder({
-            name: name,
-            constructor: constructor,
-            getId: getId
-        });
+    if (typeof window !== 'undefined') {
+        if (window && window.mParticle && window.mParticle.addForwarder) {
+            window.mParticle.addForwarder({
+                name: name,
+                constructor: constructor,
+                getId: getId
+            });
+        }
     }
 
     var FacebookEventForwarder = {
