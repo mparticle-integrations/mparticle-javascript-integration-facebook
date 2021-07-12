@@ -243,7 +243,7 @@ describe('Facebook Forwarder', function () {
             });
 
             checkBasicProperties('trackCustom');
-            window.fbqObj.should.have.property('eventName', 'Viewed testevent');
+            window.fbqObj.should.have.property('eventName', 'PageView');
             done();
         });
 
@@ -255,7 +255,7 @@ describe('Facebook Forwarder', function () {
             });
 
             checkBasicProperties('trackCustom');
-            window.fbqObj.should.have.property('eventName', 'Viewed testevent');
+            window.fbqObj.should.have.property('eventName', 'PageView');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID)
 
             done();

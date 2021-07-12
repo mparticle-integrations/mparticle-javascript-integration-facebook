@@ -23,7 +23,7 @@
             PageEvent: 4,
             CrashReport: 5,
             OptOut: 6,
-            Commerce: 16
+            Commerce: 16,
         },
         IdentityType = {
             Other: 0,
@@ -49,6 +49,14 @@
             PhoneNumber3: 21,
         },
         SupportedCommerceTypes = [],
+        //  Standard FB Event Names from https://developers.facebook.com/docs/facebook-pixel/reference#standard-events
+        PAGE_VIEW_EVENT_NAME = 'PageView';
+        ADD_TO_CART_EVENT_NAME = 'AddToCart';
+        REMOVE_FROM_CART_EVENT_NAME = 'RemoveFromCart';
+        Add_TO_WISHLIST_EVENT_NAME = 'AddToWishlist';
+        CHECKOUT_EVENT_NAME = 'InitiateCheckout';
+        PURCHASE_EVENT_NAME = 'Purchase';
+        VIEW_CONTENT_EVENT_NAME = 'ViewContent';
         constructor = function () {
             var self = this,
                 isInitialized = false,
@@ -187,20 +195,20 @@
                         params['value'] = totalValue;
 
                         if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToWishlist){
-                            eventName = 'AddToWishlist';
+                            eventName = Add_TO_WISHLIST_EVENT_NAME;
                         }
                         else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
-                            eventName = 'AddToCart';
+                            eventName = ADD_TO_CART_EVENT_NAME;
                         }
                         else{
-                            eventName = 'ViewContent';
+                            eventName = VIEW_CONTENT_EVENT_NAME;
                         }
 
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ||
                              event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
 
-                        eventName = event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ? 'InitiateCheckout' : 'Purchase';
+                        eventName = event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ? CHECKOUT_EVENT_NAME : PURCHASE_EVENT_NAME;
 
                         if (event.ProductAction.TotalAmount) {
                             params['value'] = event.ProductAction.TotalAmount;
@@ -215,7 +223,7 @@
                         params['num_items'] = num_items;
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.RemoveFromCart) {
-                        eventName = 'RemoveFromCart';
+                        eventName = REMOVE_FROM_CART_EVENT_NAME;
 
                         // remove from cart can be performed in 1 of 2 ways:
                         // 1. mParticle.eCommerce.logProductEvent(), which contains event.ProductAction.TotalAmount
@@ -252,7 +260,7 @@
             }
 
             function logPageView(event) {
-                logPageEvent(event, 'Viewed ' + event.EventName);
+                logPageEvent(event, PAGE_VIEW_EVENT_NAME);
             }
 
             function logPageEvent(event, eventName) {
