@@ -53,7 +53,7 @@
         PAGE_VIEW_EVENT_NAME = 'PageView';
         ADD_TO_CART_EVENT_NAME = 'AddToCart';
         REMOVE_FROM_CART_EVENT_NAME = 'RemoveFromCart';
-        Add_TO_WISHLIST_EVENT_NAME = 'AddToWishlist';
+        ADD_TO_WISHLIST_EVENT_NAME = 'AddToWishlist';
         CHECKOUT_EVENT_NAME = 'InitiateCheckout';
         PURCHASE_EVENT_NAME = 'Purchase';
         VIEW_CONTENT_EVENT_NAME = 'ViewContent';
