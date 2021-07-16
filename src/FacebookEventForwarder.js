@@ -195,7 +195,7 @@
                         params['value'] = totalValue;
 
                         if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToWishlist){
-                            eventName = Add_TO_WISHLIST_EVENT_NAME;
+                            eventName = ADD_TO_WISHLIST_EVENT_NAME;
                         }
                         else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
                             eventName = ADD_TO_CART_EVENT_NAME;
