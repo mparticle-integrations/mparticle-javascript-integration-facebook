@@ -98,9 +98,15 @@
                                 visitorData['external_id'] = selectedIdentity[0].Identity;
                             }
                         }
-
-                        fbq('init', settings.pixelId, visitorData);
                     }
+
+                    if (settings.disablePushState === 'True') {
+                        // Facebook will automatically track page views whenever a new state is pushed to the HTML 5 History State API
+                        // this option can be disabled to prevent duplicate page views
+                        // https://developers.facebook.com/docs/facebook-pixel/implementation/tag_spa/#tagging-single-page-applications
+                        fbq.disablePushState = true;
+                    }
+                    fbq('init', settings.pixelId, visitorData);
 
                     isInitialized = true;
 
@@ -271,6 +277,7 @@
                 if (event.EventName) {
                     params['content_name'] = event.EventName;
                 }
+
                 fbq('trackCustom', eventName || 'customEvent', params, eventID);
             }
 

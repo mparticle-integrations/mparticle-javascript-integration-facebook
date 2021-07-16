@@ -256,7 +256,26 @@ describe('Facebook Forwarder', function () {
 
             checkBasicProperties('trackCustom');
             window.fbqObj.should.have.property('eventName', 'PageView');
-            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID)
+            window.fbqObj.eventData.should.have.property(
+                'eventID',
+                SOURCE_MESSAGE_ID
+            );
+
+            done();
+        });
+
+        it('should disable push state if passed in settings', function (done) {
+            mParticle.forwarder.init(
+                {
+                    pixelCode: '1228810793810857',
+                    disablePushState: 'True',
+                },
+                reportService.cb,
+                true
+            );
+
+            window.fbq.should.have.property('disablePushState', true);
+            // window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID)
 
             done();
         });
