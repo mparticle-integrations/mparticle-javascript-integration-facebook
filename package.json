@@ -4,9 +4,11 @@
     "author": "mParticle Developers <developers@mparticle.com> (https://www.mparticle.com)",
     "description": "mParticle integration sdk for facebook",
     "main": "dist/FacebookEventForwarder.common.js",
+    "module": "dist/FacebookEventForwarder.esm.js",
     "browser": "dist/FacebookEventForwarder.common.js",
     "files": [
-        "dist/FacebookEventForwarder.common.js"
+        "dist/FacebookEventForwarder.common.js",
+        "dist/FacebookEventForwarder.esm.js"
     ],
     "repository": "https://github.com/mparticle-integrations/mparticle-javascript-integration-facebook",
     "scripts": {
