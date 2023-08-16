@@ -63,13 +63,13 @@ function isObject(val) {
         },
         SupportedCommerceTypes = [],
         //  Standard FB Event Names from https://developers.facebook.com/docs/facebook-pixel/reference#standard-events
-        ADD_TO_CART_EVENT_NAME = 'AddToCart',
-        ADD_TO_WISHLIST_EVENT_NAME = 'AddToWishlist',
-        CHECKOUT_EVENT_NAME = 'InitiateCheckout',
-        PAGE_VIEW_EVENT_NAME = 'PageView',
-        PURCHASE_EVENT_NAME = 'Purchase',
-        REMOVE_FROM_CART_EVENT_NAME = 'RemoveFromCart',
-        VIEW_CONTENT_EVENT_NAME = 'ViewContent',
+        ADD_TO_CART_EVENT_NAME = 'AddToCart';
+        ADD_TO_WISHLIST_EVENT_NAME = 'AddToWishlist';
+        CHECKOUT_EVENT_NAME = 'InitiateCheckout';
+        PAGE_VIEW_EVENT_NAME = 'PageView';
+        PURCHASE_EVENT_NAME = 'Purchase';
+        REMOVE_FROM_CART_EVENT_NAME = 'RemoveFromCart';
+        VIEW_CONTENT_EVENT_NAME = 'ViewContent';
         constructor = function () {
             var self = this,
                 isInitialized = false,
