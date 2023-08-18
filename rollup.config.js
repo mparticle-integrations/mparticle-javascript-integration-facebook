@@ -33,5 +33,21 @@ export default [
             }),
             commonjs()
         ]
+    },
+    {
+        input: 'src/FacebookEventForwarder.js',
+        output: {
+            file: 'dist/FacebookEventForwarder.esm.js',
+            format: 'esm',
+            exports: 'named',
+            name: 'mpFacebookKit',
+            strict: false
+        },
+        plugins: [
+            resolve({
+                browser: true
+            }),
+            commonjs()
+        ]
     }
 ]
