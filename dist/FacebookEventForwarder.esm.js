@@ -1,5 +1,3 @@
-Object.defineProperty(exports, '__esModule', { value: true });
-
 /*!
  * isobject <https://github.com/jonschlinkert/isobject>
  *
@@ -10,16 +8,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function isObject(val) {
   return val != null && typeof val === 'object' && Array.isArray(val) === false;
 }
-
-var isobject = /*#__PURE__*/Object.freeze({
-  'default': isObject
-});
-
-function getCjsExportFromNamespace (n) {
-	return n && n['default'] || n;
-}
-
-var isobject$1 = getCjsExportFromNamespace(isobject);
 
 /* eslint-disable no-undef */
 //  Copyright 2015 mParticle, Inc.
@@ -367,12 +355,12 @@ var isobject$1 = getCjsExportFromNamespace(isobject);
             return;
         }
 
-        if (!isobject$1(config)) {
+        if (!isObject(config)) {
             console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
         }
 
-        if (isobject$1(config.kits)) {
+        if (isObject(config.kits)) {
             config.kits[name] = {
                 constructor: constructor
             };
@@ -400,5 +388,5 @@ var isobject$1 = getCjsExportFromNamespace(isobject);
     };
 var FacebookEventForwarder_1 = FacebookEventForwarder.register;
 
-exports.default = FacebookEventForwarder;
-exports.register = FacebookEventForwarder_1;
+export default FacebookEventForwarder;
+export { FacebookEventForwarder_1 as register };
