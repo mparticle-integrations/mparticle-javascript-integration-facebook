@@ -227,6 +227,17 @@
                             return sum;
                         }, 0);
                         params['num_items'] = num_items;
+
+                        if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
+                            var contents = buildProductContents(event.ProductAction.ProductList);
+                            if (contents && contents.length) {
+                                params['contents'] = contents;
+                                params['content_type'] = 'product';
+                            }
+                            if (event.ProductAction.TransactionId) {
+                                params['order_id'] = event.ProductAction.TransactionId;
+                            }
+                        }
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.RemoveFromCart) {
                         eventName = REMOVE_FROM_CART_EVENT_NAME;
@@ -296,6 +307,29 @@
 
             function isNumeric(n) {
                 return !isNaN(parseFloat(n)) && isFinite(n);
+            }
+
+            function buildProductContents(productList) {
+                if (!productList || !productList.length) {
+                    return [];
+                }
+                try {
+                    return productList
+                        .filter(function (p) { return p && (p.Sku || p.Id); })
+                        .map(function (p) {
+                            return {
+                                id: p.Sku || p.Id,
+                                quantity: isNumeric(p.Quantity) ? p.Quantity : 1,
+                                product_type: 'test',
+                                content_name: p.Name,
+                                name: p.Name,
+                                variant: p.Variant,
+                                category: p.Category
+                            };
+                        });
+                } catch (e) {
+                    return [];
+                }
             }
 
             function getEventCategoryString(event) {
