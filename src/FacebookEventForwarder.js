@@ -109,6 +109,7 @@
                     fbq('init', settings.pixelId, visitorData);
 
                     isInitialized = true;
+                    self._settings = settings || {};
 
                     return 'Successfully initialized: ' + name;
 
@@ -309,23 +310,64 @@
                 return !isNaN(parseFloat(n)) && isFinite(n);
             }
 
+            function parseMappings(str) {
+                if (!str) return [];
+                try { return JSON.parse((str + '').replace(/&quot;/g, '"')); } catch (_) { return []; }
+            }
+
+            // Resolve a simple product key by checking top-level first, then Attributes bag
+            function getField(product, key) {
+                if (!product || !key) return undefined;
+                if (Object.prototype.hasOwnProperty.call(product, key)) {
+                    return product[key];
+                }
+                var attrs = product.Attributes;
+                if (attrs && typeof attrs === 'object' && Object.prototype.hasOwnProperty.call(attrs, key)) {
+                    return attrs[key];
+                }
+                return undefined;
+            }
+
             function buildProductContents(productList) {
                 if (!productList || !productList.length) {
                     return [];
                 }
                 try {
+                    var setting = self._settings;
+                    var mappings = parseMappings(setting.productAttributeMapping);
+                    var sourceKey = setting.productAttributeSource;            
+                    var destKey = setting.productAttributeDestKey;
                     return productList
                         .filter(function (p) { return p && (p.Sku || p.Id); })
                         .map(function (p) {
-                            return {
+                            var obj = {
                                 id: p.Sku || p.Id,
                                 quantity: isNumeric(p.Quantity) ? p.Quantity : 1,
-                                product_type: 'test',
                                 content_name: p.Name,
                                 name: p.Name,
                                 variant: p.Variant,
                                 category: p.Category
                             };
+                            if (mappings) {
+                                mappings.forEach(function (m) {
+                                    if (!m || !m.map || !m.value) return;
+                                    var val = getField(p, m.map);
+                                    if (val !== undefined && val !== null) {
+                                        obj[m.value] = val;
+                                    }
+                                });
+                                return obj;
+                            }
+                            var srcVal = '';
+                            if (sourceKey) {
+                                if (p.Attributes && typeof p.Attributes === 'object' && p.Attributes.hasOwnProperty(sourceKey)) {
+                                    srcVal = p.Attributes[sourceKey];
+                                } else if (p.hasOwnProperty(sourceKey)) {
+                                    srcVal = p[sourceKey];
+                                }
+                            }
+                            obj[destKey] = srcVal;
+                            return obj;
                         });
                 } catch (e) {
                     return [];
