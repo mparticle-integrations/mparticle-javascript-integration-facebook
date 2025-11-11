@@ -126,7 +126,7 @@
             function loadMappings() {
                 productAttributeMapping = settings.productAttributeMapping
                 ? JSON.parse(settings.productAttributeMapping.replace(/&quot;/g, '"'))
-                : {};
+                : [];
             }
 
             function processEvent(event) {
@@ -374,25 +374,28 @@
                         };
             
                         // Apply configured mappings to custom attributes
-                        for (var sourceField in productAttributeMapping) {
-                            if (productAttributeMapping.hasOwnProperty(sourceField)) {
-                                var facebookFieldName = productAttributeMapping[sourceField];
-                                var value = null;
-                                
-                                // check for standard product field
-                                if (product.hasOwnProperty(sourceField)) {
-                                    value = product[sourceField];
-                                }
-                                // check for custom attributes
-                                else if (product.Attributes && product.Attributes[sourceField]) {
-                                    value = product.Attributes[sourceField];
-                                }
-                                
-                                if (value !== null && value !== undefined) {
-                                    contentItem[facebookFieldName] = value;
-                                }
+                        productAttributeMapping.forEach(function(productMapping) {
+                            if (!productMapping || !productMapping.map || !productMapping.value) {
+                                return;
                             }
-                        }
+                            
+                            var sourceField = productMapping.map;
+                            var facebookFieldName = productMapping.value;
+                            var value = null;
+                            
+                            // Check for Product level field first
+                            if (product.hasOwnProperty(sourceField)) {
+                                value = product[sourceField];
+                            }
+                            // then check for Product.Attributes level field
+                            else if (product.Attributes && product.Attributes[sourceField]) {
+                                value = product.Attributes[sourceField];
+                            }
+                            
+                            if (value !== null && value !== undefined) {
+                                contentItem[facebookFieldName] = value;
+                            }
+                        });
                         return contentItem;
                     });
             }
