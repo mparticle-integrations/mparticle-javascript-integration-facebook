@@ -860,7 +860,7 @@ describe('Facebook Forwarder', function () {
         });
 
         it('should build contents array with mapped attributes for Purchase events', function (done) {
-            // Initialize with product attribute mapping (as JSON string)
+            // Initialize with product attribute mapping
             mParticle.forwarder.init({
                 pixelCode: 'test-pixel-code',
                 "productAttributeMapping":"[{&quot;jsmap&quot;:&quot;3373707&quot;,&quot;map&quot;:&quot;Name&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_name&quot;},{&quot;jsmap&quot;:&quot;93997959&quot;,&quot;map&quot;:&quot;Brand&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_brand&quot;},{&quot;jsmap&quot;:&quot;106934601&quot;,&quot;map&quot;:&quot;Price&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_price&quot;},{&quot;jsmap&quot;:&quot;50511102&quot;,&quot;map&quot;:&quot;Category&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_category&quot;},{&quot;jsmap&quot;:&quot;94842723&quot;,&quot;map&quot;:&quot;category&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_attribute_category&quot;}]"
