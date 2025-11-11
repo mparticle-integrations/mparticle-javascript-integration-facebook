@@ -880,7 +880,7 @@ describe('Facebook Forwarder', function () {
                     ProductActionType: ProductActionType.Purchase,
                     ProductList: [
                         {
-                            Id: 'id-12',
+                            Sku: 'sku-12',
                             Name: 'iPhone',
                             Brand: 'Apple',
                             Category: 'electronics',
@@ -892,7 +892,7 @@ describe('Facebook Forwarder', function () {
                             }
                         },
                         {
-                            Id: 'id-34',
+                            Sku: 'sku-34',
                             Name: 'Watch',
                             Brand: 'Samsung',
                             Price: 450.99,
@@ -914,7 +914,7 @@ describe('Facebook Forwarder', function () {
             
             var firstProduct = window.fbqObj.params.contents[0];
             // Standard Facebook fields
-            firstProduct.should.have.property('id', 'id-12');
+            firstProduct.should.have.property('id', 'sku-12');
             firstProduct.should.have.property('name', 'iPhone');
             firstProduct.should.have.property('brand', 'Apple');
             firstProduct.should.have.property('item_price', 1000.99);

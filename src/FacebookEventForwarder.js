@@ -357,41 +357,44 @@
                 if (!productList || productList.length === 0) {
                     return [];
                 }
-
-                return productList.map(function(product) {
-                    var contentItem = {
-                        id: product.Id,
-                        quantity: isNumeric(product.Quantity) ? product.Quantity : 1,
-                        name: product.Name,
-                        brand: product.Brand,
-                        category: product.Category,
-                        variant: product.Variant,
-                        item_price: isNumeric(product.Price) ? product.Price : null
-                    };
-
-                    // Apply configured mappings to custom attributes
-                    for (var sourceField in productAttributeMapping) {
-                        if (productAttributeMapping.hasOwnProperty(sourceField)) {
-                            var facebookFieldName = productAttributeMapping[sourceField];
-                            var value = null;
-                            
-                            // Check standard product field first
-                            if (product.hasOwnProperty(sourceField)) {
-                                value = product[sourceField];
-                            }
-                            // Then check custom attributes
-                            else if (product.Attributes && product.Attributes[sourceField]) {
-                                value = product.Attributes[sourceField];
-                            }
-                            
-                            if (value !== null && value !== undefined) {
-                                contentItem[facebookFieldName] = value;
+            
+                return productList
+                    .filter(function(product) {
+                        return product && product.Sku;
+                    })
+                    .map(function(product) {
+                        var contentItem = {
+                            id: product.Sku,
+                            quantity: isNumeric(product.Quantity) ? product.Quantity : 1,
+                            name: product.Name,
+                            brand: product.Brand,
+                            category: product.Category,
+                            variant: product.Variant,
+                            item_price: isNumeric(product.Price) ? product.Price : null
+                        };
+            
+                        // Apply configured mappings to custom attributes
+                        for (var sourceField in productAttributeMapping) {
+                            if (productAttributeMapping.hasOwnProperty(sourceField)) {
+                                var facebookFieldName = productAttributeMapping[sourceField];
+                                var value = null;
+                                
+                                // check for standard product field
+                                if (product.hasOwnProperty(sourceField)) {
+                                    value = product[sourceField];
+                                }
+                                // check for custom attributes
+                                else if (product.Attributes && product.Attributes[sourceField]) {
+                                    value = product.Attributes[sourceField];
+                                }
+                                
+                                if (value !== null && value !== undefined) {
+                                    contentItem[facebookFieldName] = value;
+                                }
                             }
                         }
-                    }
-
-                    return contentItem;
-                });
+                        return contentItem;
+                    });
             }
 
             // https://developers.facebook.com/docs/marketing-api/conversions-api/deduplicate-pixel-and-server-events#event-deduplication-options
