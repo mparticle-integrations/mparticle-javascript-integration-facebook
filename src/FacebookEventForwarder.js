@@ -60,11 +60,14 @@
         constructor = function () {
             var self = this,
                 isInitialized = false,
-                reportingService = null;
+                reportingService = null,
+                settings,
+                productAttributeMapping;
 
             self.name = name;
 
-            function initForwarder(settings, service, testMode, trackerId, userAttributes, userIdentities) {
+            function initForwarder(forwarderSettings, service, testMode, trackerId, userAttributes, userIdentities) {
+                settings = forwarderSettings;
                 reportingService = service;
 
                 SupportedCommerceTypes = [
@@ -107,9 +110,10 @@
                         fbq.disablePushState = true;
                     }
                     fbq('init', settings.pixelId, visitorData);
+                    
+                    loadMappings();
 
                     isInitialized = true;
-                    self._settings = settings || {};
 
                     return 'Successfully initialized: ' + name;
 
@@ -117,6 +121,12 @@
                 catch (e) {
                     return 'Can\'t initialize forwarder: ' + name + ':' + e;
                 }
+            }
+
+            function loadMappings() {
+                productAttributeMapping = settings.productAttributeMapping
+                ? JSON.parse(settings.productAttributeMapping.replace(/&quot;/g, '"'))
+                : {};
             }
 
             function processEvent(event) {
@@ -213,7 +223,7 @@
 
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ||
-                             event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
+                            event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
 
                         eventName = event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ? CHECKOUT_EVENT_NAME : PURCHASE_EVENT_NAME;
 
@@ -228,15 +238,16 @@
                             return sum;
                         }, 0);
                         params['num_items'] = num_items;
+                        
+                        if (event.ProductAction.TransactionId) {
+                            params['order_id'] = event.ProductAction.TransactionId;
+                        }
 
+                        // Build contents array for Purchase events
                         if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
                             var contents = buildProductContents(event.ProductAction.ProductList);
-                            if (contents && contents.length) {
+                            if (contents && contents.length > 0) {
                                 params['contents'] = contents;
-                                params['content_type'] = 'product';
-                            }
-                            if (event.ProductAction.TransactionId) {
-                                params['order_id'] = event.ProductAction.TransactionId;
                             }
                         }
                     }
@@ -310,70 +321,6 @@
                 return !isNaN(parseFloat(n)) && isFinite(n);
             }
 
-            function parseMappings(str) {
-                if (!str) return [];
-                try { return JSON.parse((str + '').replace(/&quot;/g, '"')); } catch (_) { return []; }
-            }
-
-            // Resolve a simple product key by checking top-level first, then Attributes bag
-            function getField(product, key) {
-                if (!product || !key) return undefined;
-                if (Object.prototype.hasOwnProperty.call(product, key)) {
-                    return product[key];
-                }
-                var attrs = product.Attributes;
-                if (attrs && typeof attrs === 'object' && Object.prototype.hasOwnProperty.call(attrs, key)) {
-                    return attrs[key];
-                }
-                return undefined;
-            }
-
-            function buildProductContents(productList) {
-                if (!productList || !productList.length) {
-                    return [];
-                }
-                try {
-                    var setting = self._settings;
-                    var mappings = parseMappings(setting.productAttributeMapping);
-                    var sourceKey = setting.productAttributeSource;            
-                    var destKey = setting.productAttributeDestKey;
-                    return productList
-                        .filter(function (p) { return p && (p.Sku || p.Id); })
-                        .map(function (p) {
-                            var obj = {
-                                id: p.Sku || p.Id,
-                                quantity: isNumeric(p.Quantity) ? p.Quantity : 1,
-                                content_name: p.Name,
-                                name: p.Name,
-                                variant: p.Variant,
-                                category: p.Category
-                            };
-                            if (mappings) {
-                                mappings.forEach(function (m) {
-                                    if (!m || !m.map || !m.value) return;
-                                    var val = getField(p, m.map);
-                                    if (val !== undefined && val !== null) {
-                                        obj[m.value] = val;
-                                    }
-                                });
-                                return obj;
-                            }
-                            var srcVal = '';
-                            if (sourceKey) {
-                                if (p.Attributes && typeof p.Attributes === 'object' && p.Attributes.hasOwnProperty(sourceKey)) {
-                                    srcVal = p.Attributes[sourceKey];
-                                } else if (p.hasOwnProperty(sourceKey)) {
-                                    srcVal = p[sourceKey];
-                                }
-                            }
-                            obj[destKey] = srcVal;
-                            return obj;
-                        });
-                } catch (e) {
-                    return [];
-                }
-            }
-
             function getEventCategoryString(event) {
 
                 var enumTypeValues;
@@ -397,6 +344,54 @@
                 }
 
                 return null;
+            }
+
+            /**
+             * Builds contents array for Facebook Pixel commerce events.
+             * Creates a nested array of content items with product details.
+             * 
+             * @param {Array} productList - Array of products from event.ProductAction.ProductList
+             * @returns {Array} Array of content objects for Facebook Pixel
+             */
+            function buildProductContents(productList) {
+                if (!productList || productList.length === 0) {
+                    return [];
+                }
+
+                return productList.map(function(product) {
+                    var contentItem = {
+                        id: product.Id,
+                        quantity: isNumeric(product.Quantity) ? product.Quantity : 1,
+                        name: product.Name,
+                        brand: product.Brand,
+                        category: product.Category,
+                        variant: product.Variant,
+                        item_price: isNumeric(product.Price) ? product.Price : null
+                    };
+
+                    // Apply configured mappings to custom attributes
+                    for (var sourceField in productAttributeMapping) {
+                        if (productAttributeMapping.hasOwnProperty(sourceField)) {
+                            var facebookFieldName = productAttributeMapping[sourceField];
+                            var value = null;
+                            
+                            // Check standard product field first
+                            if (product.hasOwnProperty(sourceField)) {
+                                value = product[sourceField];
+                            }
+                            // Then check custom attributes
+                            else if (product.Attributes && product.Attributes[sourceField]) {
+                                value = product.Attributes[sourceField];
+                            }
+                            
+                            if (value !== null && value !== undefined) {
+                                contentItem[facebookFieldName] = value;
+                            }
+                        }
+                    }
+
+                    return contentItem;
+                });
             }
 
             // https://developers.facebook.com/docs/marketing-api/conversions-api/deduplicate-pixel-and-server-events#event-deduplication-options
