@@ -375,7 +375,7 @@
             
                         // Apply configured mappings to custom attributes
                         productAttributeMapping.forEach(function(productMapping) {
-                            if (!productMapping || !productMapping.map || !productMapping.value) {
+                            if (!isObject(productMapping) || !productMapping.map || !productMapping.value) {
                                 return;
                             }
                             
