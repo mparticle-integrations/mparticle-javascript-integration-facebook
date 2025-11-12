@@ -44,7 +44,7 @@ module.exports = {
         [
             '@semantic-release/github',
             {
-                assets: ['dist/FacebookEventForwarder.common.js', 'dist/FacebookEventForwarder.iife.js'],
+                assets: ['dist/FacebookEventForwarder.common.js', 'dist/FacebookEventForwarder.iife.js', 'dist/FacebookEventForwarder.esm.js'],
             },
         ],
         [
