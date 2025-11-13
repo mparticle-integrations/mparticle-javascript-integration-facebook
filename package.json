@@ -17,7 +17,7 @@
         "test": "node test/boilerplate/test-karma.js"
     },
     "devDependencies": {
-        "@mparticle/web-sdk": "^2.49.0",
+        "@mparticle/web-sdk": "^2.50.0",
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/exec": "^6.0.0",
         "@semantic-release/git": "^10.0.1",
