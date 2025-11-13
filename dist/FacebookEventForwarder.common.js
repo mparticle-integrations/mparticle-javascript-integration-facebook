@@ -12,6 +12,7 @@ function isObject(val) {
 }
 
 var isobject = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   'default': isObject
 });
 
@@ -83,11 +84,14 @@ var isobject$1 = getCjsExportFromNamespace(isobject);
         constructor = function () {
             var self = this,
                 isInitialized = false,
-                reportingService = null;
+                reportingService = null,
+                settings,
+                productAttributeMapping;
 
             self.name = name;
 
-            function initForwarder(settings, service, testMode, trackerId, userAttributes, userIdentities) {
+            function initForwarder(forwarderSettings, service, testMode, trackerId, userAttributes, userIdentities) {
+                settings = forwarderSettings;
                 reportingService = service;
 
                 SupportedCommerceTypes = [
@@ -130,6 +134,8 @@ var isobject$1 = getCjsExportFromNamespace(isobject);
                         fbq.disablePushState = true;
                     }
                     fbq('init', settings.pixelId, visitorData);
+                    
+                    loadMappings();
 
                     isInitialized = true;
 
@@ -139,6 +145,12 @@ var isobject$1 = getCjsExportFromNamespace(isobject);
                 catch (e) {
                     return 'Can\'t initialize forwarder: ' + name + ':' + e;
                 }
+            }
+
+            function loadMappings() {
+                productAttributeMapping = settings.productAttributeMapping
+                ? JSON.parse(settings.productAttributeMapping.replace(/&quot;/g, '"'))
+                : [];
             }
 
             function processEvent(event) {
@@ -229,13 +241,13 @@ var isobject$1 = getCjsExportFromNamespace(isobject);
                         else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
                             eventName = ADD_TO_CART_EVENT_NAME;
                         }
-                        else{
+                        else {
                             eventName = VIEW_CONTENT_EVENT_NAME;
                         }
 
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ||
-                             event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
+                            event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
 
                         eventName = event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout ? CHECKOUT_EVENT_NAME : PURCHASE_EVENT_NAME;
 
@@ -250,6 +262,18 @@ var isobject$1 = getCjsExportFromNamespace(isobject);
                             return sum;
                         }, 0);
                         params['num_items'] = num_items;
+                        
+                        if (event.ProductAction.TransactionId) {
+                            params['order_id'] = event.ProductAction.TransactionId;
+                        }
+
+                        // Build contents array for Purchase events
+                        if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
+                            var contents = buildProductContents(event.ProductAction.ProductList);
+                            if (contents && contents.length > 0) {
+                                params['contents'] = contents;
+                            }
+                        }
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.RemoveFromCart) {
                         eventName = REMOVE_FROM_CART_EVENT_NAME;
@@ -344,6 +368,60 @@ var isobject$1 = getCjsExportFromNamespace(isobject);
                 }
 
                 return null;
+            }
+
+            /**
+             * Builds contents array for Facebook Pixel commerce events.
+             * Creates a nested array of content items with product details.
+             * 
+             * @param {Array} productList - Array of products from event.ProductAction.ProductList
+             * @returns {Array} Array of content objects for Facebook Pixel
+             */
+            function buildProductContents(productList) {
+                if (!productList || productList.length === 0) {
+                    return [];
+                }
+            
+                return productList
+                    .filter(function(product) {
+                        return product && product.Sku;
+                    })
+                    .map(function(product) {
+                        var contentItem = {
+                            id: product.Sku,
+                            quantity: isNumeric(product.Quantity) ? product.Quantity : 1,
+                            name: product.Name,
+                            brand: product.Brand,
+                            category: product.Category,
+                            variant: product.Variant,
+                            item_price: isNumeric(product.Price) ? product.Price : null
+                        };
+            
+                        // Apply configured mappings to custom attributes
+                        productAttributeMapping.forEach(function(productMapping) {
+                            if (!isobject$1(productMapping) || !productMapping.map || !productMapping.value) {
+                                return;
+                            }
+                            
+                            var sourceField = productMapping.map;
+                            var facebookFieldName = productMapping.value;
+                            var value = null;
+                            
+                            // Check for Product level field first
+                            if (product.hasOwnProperty(sourceField)) {
+                                value = product[sourceField];
+                            }
+                            // then check for Product.Attributes level field
+                            else if (product.Attributes && product.Attributes[sourceField]) {
+                                value = product.Attributes[sourceField];
+                            }
+                            
+                            if (value !== null && value !== undefined) {
+                                contentItem[facebookFieldName] = value;
+                            }
+                        });
+                        return contentItem;
+                    });
             }
 
             // https://developers.facebook.com/docs/marketing-api/conversions-api/deduplicate-pixel-and-server-events#event-deduplication-options
