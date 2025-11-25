@@ -216,6 +216,16 @@ var name = 'Facebook',
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
                         eventName = ADD_TO_CART_EVENT_NAME;
+                        if (event.ProductAction.TransactionId) {
+                            params['order_id'] = event.ProductAction.TransactionId;
+                        }
+    
+                        // Build contents array for Purchase events
+                        var contents = buildProductContents(event.ProductAction.ProductList);
+                        if (contents && contents.length > 0) {
+                            params['contents'] = contents;
+                        }
+
                     }
                     else{
                         eventName = VIEW_CONTENT_EVENT_NAME;
@@ -244,11 +254,9 @@ var name = 'Facebook',
                     }
 
                     // Build contents array for Purchase events
-                    if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
-                        var contents = buildProductContents(event.ProductAction.ProductList);
-                        if (contents && contents.length > 0) {
-                            params['contents'] = contents;
-                        }
+                    var contents = buildProductContents(event.ProductAction.ProductList);
+                    if (contents && contents.length > 0) {
+                        params['contents'] = contents;
                     }
                 }
                 else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.RemoveFromCart) {
