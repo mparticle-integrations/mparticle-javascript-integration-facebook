@@ -220,7 +220,7 @@ var name = 'Facebook',
                             params['order_id'] = event.ProductAction.TransactionId;
                         }
     
-                        // Build contents array for Purchase events
+                        // Build contents array for AddToCart events
                         var contents = buildProductContents(event.ProductAction.ProductList);
                         if (contents && contents.length > 0) {
                             params['contents'] = contents;
@@ -253,7 +253,7 @@ var name = 'Facebook',
                         params['order_id'] = event.ProductAction.TransactionId;
                     }
 
-                    // Build contents array for Purchase events
+                    // Build contents array for Purchase/Checkout events
                     var contents = buildProductContents(event.ProductAction.ProductList);
                     if (contents && contents.length > 0) {
                         params['contents'] = contents;
