@@ -168,6 +168,7 @@ var name = 'Facebook',
 
                 var eventName,
                     totalValue,
+                    contents,
                     params = cloneEventAttributes(event),
                     eventID = createEventId(event);
                 params['currency'] = event.CurrencyCode || 'USD';
@@ -216,15 +217,15 @@ var name = 'Facebook',
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
                         eventName = ADD_TO_CART_EVENT_NAME;
-                        if (event.ProductAction.TransactionId) {
-                            params['order_id'] = event.ProductAction.TransactionId;
-                        }
-    
-                        // Build contents array for AddToCart events
-                        var contents = buildProductContents(event.ProductAction.ProductList);
-                        if (contents && contents.length > 0) {
-                            params['contents'] = contents;
-                        }
+                    if (event.ProductAction.TransactionId) {
+                        params['order_id'] = event.ProductAction.TransactionId;
+                    }
+
+                    // Build contents array for AddToCart events
+                    contents = buildProductContents(event.ProductAction.ProductList);
+                    if (contents && contents.length > 0) {
+                        params['contents'] = contents;
+                    }
 
                     }
                     else{
@@ -254,7 +255,7 @@ var name = 'Facebook',
                     }
 
                     // Build contents array for Purchase/Checkout events
-                    var contents = buildProductContents(event.ProductAction.ProductList);
+                    contents = buildProductContents(event.ProductAction.ProductList);
                     if (contents && contents.length > 0) {
                         params['contents'] = contents;
                     }
