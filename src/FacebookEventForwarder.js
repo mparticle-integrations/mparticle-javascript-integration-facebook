@@ -217,16 +217,15 @@ var name = 'Facebook',
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
                         eventName = ADD_TO_CART_EVENT_NAME;
-                    if (event.ProductAction.TransactionId) {
-                        params['order_id'] = event.ProductAction.TransactionId;
-                    }
+                        if (event.ProductAction.TransactionId) {
+                            params['order_id'] = event.ProductAction.TransactionId;
+                        }
 
-                    // Build contents array for AddToCart events
-                    contents = buildProductContents(event.ProductAction.ProductList);
-                    if (contents && contents.length > 0) {
-                        params['contents'] = contents;
-                    }
-
+                        // Build contents array for AddToCart events
+                        contents = buildProductContents(event.ProductAction.ProductList);
+                        if (contents && contents.length > 0) {
+                            params['contents'] = contents;
+                        }
                     }
                     else{
                         eventName = VIEW_CONTENT_EVENT_NAME;
