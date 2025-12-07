@@ -70,10 +70,8 @@ jobs:
         
         # OIDC permissions for npm trusted publishing
         permissions:
-            contents: write      # For pushing commits and tags
-            issues: write        # For semantic-release to comment on issues
-            pull-requests: write # For semantic-release to comment on PRs
-            id-token: write      # Required for OIDC authentication with npm
+          id-token: write      # Required for OIDC authentication with npm
+          contents: read
         
         env:
             GITHUB_TOKEN: ${{ secrets.MP_INTEGRATIONS_SEMANTIC_RELEASE_BOT }}
