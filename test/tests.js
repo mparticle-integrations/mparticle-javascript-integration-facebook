@@ -587,8 +587,8 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - RemoveFromCart');
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
-            window.fbqObj.params.should.not.have.property('order_id');
-            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.params.should.have.property('order_id', 123);
+            window.fbqObj.params.should.have.property('contents');
 
             done();
         });
@@ -629,8 +629,8 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_name', 'eCommerce - RemoveFromCart');
             window.fbqObj.params.should.have.property('content_ids', ['12345']);
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
-            window.fbqObj.params.should.not.have.property('order_id');
-            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.params.should.have.property('order_id', 123);
+            window.fbqObj.params.should.have.property('contents');
 
             done();
         });
@@ -1073,5 +1073,291 @@ describe('Facebook Forwarder', function () {
 
             done();
         });
+
+        it('should build contents array with mapped attributes for RemoveFromCart events', function (done) {
+            // Initialize with product attribute mapping
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                "productAttributeMapping":"[{&quot;jsmap&quot;:&quot;3373707&quot;,&quot;map&quot;:&quot;Name&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_name&quot;},{&quot;jsmap&quot;:&quot;93997959&quot;,&quot;map&quot;:&quot;Brand&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_brand&quot;},{&quot;jsmap&quot;:&quot;106934601&quot;,&quot;map&quot;:&quot;Price&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_price&quot;},{&quot;jsmap&quot;:&quot;50511102&quot;,&quot;map&quot;:&quot;Category&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_category&quot;},{&quot;jsmap&quot;:&quot;94842723&quot;,&quot;map&quot;:&quot;category&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_attribute_category&quot;}]"
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - RemoveFromCart',
+                EventCategory: CommerceEventType.ProductRemoveFromCart,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.RemoveFromCart,
+                    ProductList: [
+                        {
+                            Sku: '12345',
+                            Name: 'iPhone 6',
+                            Category: 'Phones',
+                            Brand: 'iPhone',
+                            Variant: '6',
+                            Price: 200,
+                            CouponCode: null,
+                            Quantity: 1,
+                            TotalAmount: 200,
+                            Attributes: {
+                                category: 'phones'
+                            }
+                        }
+                    ],
+                    TransactionId: 123,
+                    Affiliation: 'my-affiliation',
+                    TaxAmount: 40,
+                    ShippingAmount: 10,
+                    TotalAmount: 205
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+            });
+
+            checkBasicProperties('trackCustom');
+            window.fbqObj.should.have.property('eventName', 'RemoveFromCart');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(1);
+            window.fbqObj.params.should.have.property('order_id', 123);
+            
+            var firstProduct = window.fbqObj.params.contents[0];
+            // Standard Facebook fields
+            firstProduct.should.have.property('id', '12345');
+            firstProduct.should.have.property('name', 'iPhone 6');
+            firstProduct.should.have.property('brand', 'iPhone');
+            firstProduct.should.have.property('item_price', 200);
+            firstProduct.should.have.property('quantity', 1);
+            
+            // Mapped standard fields
+            firstProduct.should.have.property('custom_name', 'iPhone 6');
+            firstProduct.should.have.property('custom_brand', 'iPhone');
+            firstProduct.should.have.property('custom_price', 200);
+            firstProduct.should.have.property('custom_category', 'Phones');
+            
+            // Mapped custom attribute
+            firstProduct.should.have.property('custom_attribute_category', 'phones');
+
+            done();
+        });
+
+        it('should log Purchase event with product names as contents', function (done) {
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                sendProductNamesasContents: true
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - Purchase',
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.Purchase,
+                    ProductList: [
+                        {
+                            Sku: 'sku-12',
+                            Name: 'iPhone',
+                            Brand: 'Apple',
+                            Category: 'electronics',
+                            Variant: 'blue',
+                            Price: 1000.99,
+                            Quantity: 1,
+                            Attributes: {
+                                category: 'phones'
+                            }
+                        },
+                        {
+                            Sku: 'sku-no-name',
+                            // Name missing to test filter
+                            Brand: 'Generic',
+                            Price: 99.99,
+                            Quantity: 1
+                        },
+                        {
+                            Sku: 'sku-34',
+                            Name: 'Watch',
+                            Brand: 'Samsung',
+                            Price: 450.99,
+                            Quantity: 2
+                        }
+                    ],
+                    TransactionId: 'txn-1234',
+                    TotalAmount: 1551.97
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+            });
+
+            checkBasicProperties('track');
+            window.fbqObj.should.have.property('eventName', 'Purchase');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(3);
+            window.fbqObj.params.contents[0].should.have.property('name', 'iPhone');
+            window.fbqObj.params.contents[2].should.have.property('name', 'Watch');
+            // content_name should only include products with names (filters out product without Name)
+            window.fbqObj.params.should.have.property('content_name', ['iPhone', 'Watch']);
+            window.fbqObj.params.should.have.property('order_id', 'txn-1234');
+            window.fbqObj.params.should.have.property('value', 1551.97);
+            window.fbqObj.params.should.have.property('currency', 'USD');
+            window.fbqObj.params.should.have.property('num_items', 4);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+
+            done();
+        });
+
+        it('should log AddToCart event with product names as contents', function (done) {
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                sendProductNamesasContents: true
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - AddToCart',
+                EventCategory: CommerceEventType.ProductAddToCart,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.AddToCart,
+                    ProductList: [
+                        {
+                            Sku: '12345',
+                            Name: 'iPhone 6',
+                            Category: 'Phones',
+                            Brand: 'iPhone',
+                            Variant: '6',
+                            Price: 400,
+                            CouponCode: null,
+                            Quantity: 1
+                        },
+                        {
+                            Sku: '1234',
+                            Name: 'iPhone 11',
+                            Category: 'Phones',
+                            Brand: 'iPhone',
+                            Variant: '6',
+                            Price: 500,
+                            CouponCode: null,
+                            Quantity: 2
+                        }
+                    ],
+                    TransactionId: 123,
+                    Affiliation: 'my-affiliation',
+                    TaxAmount: 40,
+                    ShippingAmount: 10
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+
+            });
+
+            checkBasicProperties('track');
+            window.fbqObj.should.have.property('eventName', 'AddToCart');
+            window.fbqObj.params.should.have.property('content_name', ['iPhone 6', 'iPhone 11']);
+            window.fbqObj.params.should.have.property('content_ids', ['12345', '1234']);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+            done();
+        });
+
+        it('should log RemoveFromCart event with product names as content_name', function (done) {
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                sendProductNamesasContents: true
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - RemoveFromCart',
+                EventCategory: CommerceEventType.ProductRemoveFromCart,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.RemoveFromCart,
+                    ProductList: [
+                        {
+                            Sku: '12345',
+                            Name: 'iPhone 6',
+                            Category: 'Phones',
+                            Brand: 'iPhone',
+                            Variant: '6',
+                            Price: 200,
+                            CouponCode: null,
+                            Quantity: 1,
+                            TotalAmount: 200
+                        }
+                    ],
+                    TransactionId: 123,
+                    Affiliation: 'my-affiliation',
+                    TaxAmount: 40,
+                    ShippingAmount: 10,
+                    TotalAmount: 205
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+            });
+
+            checkBasicProperties('trackCustom');
+            window.fbqObj.should.have.property('eventName', 'RemoveFromCart');
+            window.fbqObj.params.should.have.property('content_name', ['iPhone 6']);
+            window.fbqObj.params.should.have.property('content_ids', ['12345']);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+            done();
+        });
+
+        it('should log Checkout event with product names as contents', function (done) {
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                sendProductNamesasContents: true
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - Checkout',
+                EventCategory: CommerceEventType.ProductCheckout,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.Checkout,
+                    ProductList: [
+                        {
+                            Sku: 'sku-12',
+                            Name: 'iPhone',
+                            Brand: 'Apple',
+                            Category: 'electronics',
+                            Variant: 'blue',
+                            Price: 1000.99,
+                            Quantity: 1
+                        },
+                        {
+                            Sku: 'sku-no-name',
+                            // Name missing to test filter
+                            Brand: 'Generic',
+                            Price: 75.50,
+                            Quantity: 1
+                        },
+                        {
+                            Sku: 'sku-34',
+                            Name: 'Watch',
+                            Brand: 'Samsung',
+                            Price: 450.99,
+                            Quantity: 2
+                        }
+                    ],
+                    TransactionId: 'txn-5678',
+                    TotalAmount: 1978.47,
+                    CheckoutStep: 1
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+            });
+
+            checkBasicProperties('track');
+            window.fbqObj.should.have.property('eventName', 'InitiateCheckout');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(3);
+            window.fbqObj.params.contents[0].should.have.property('name', 'iPhone');
+            window.fbqObj.params.contents[2].should.have.property('name', 'Watch');
+            // content_name should only include products with names (filters out product without Name)
+            window.fbqObj.params.should.have.property('content_name', ['iPhone', 'Watch']);
+            window.fbqObj.params.should.have.property('order_id', 'txn-5678');
+            window.fbqObj.params.should.have.property('value', 1978.47);
+            window.fbqObj.params.should.have.property('currency', 'USD');
+            window.fbqObj.params.should.have.property('num_items', 4);
+            window.fbqObj.params.should.have.property('checkout_step', 1);
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+
+            done();
+        }); 
     });
 });
