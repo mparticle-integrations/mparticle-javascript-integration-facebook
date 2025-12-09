@@ -165,12 +165,13 @@ var name = 'Facebook',
                 event.ProductAction.ProductList &&
                 event.ProductAction.ProductActionType &&
                 SupportedCommerceTypes.indexOf(event.ProductAction.ProductActionType) > -1) {
-
                 var eventName,
                     totalValue,
                     contents,
                     params = cloneEventAttributes(event),
-                    eventID = createEventId(event);
+                    eventID = createEventId(event),
+                    sendProductNamesAsContents = settings.sendProductNamesasContents || false;
+
                 params['currency'] = event.CurrencyCode || 'USD';
 
                 if (event.EventName) {
@@ -217,10 +218,14 @@ var name = 'Facebook',
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
                         eventName = ADD_TO_CART_EVENT_NAME;
-                        if (event.ProductAction.TransactionId) {
-                            params['order_id'] = event.ProductAction.TransactionId;
+
+                        // Set product names as content_name if enabled
+                        if (sendProductNamesAsContents) {
+                            setProductNamesAsContentName(params, event.ProductAction.ProductList);
                         }
 
+                        setOrderId(params, event.ProductAction.TransactionId);
+                        
                         // Build contents array for AddToCart events
                         contents = buildProductContents(event.ProductAction.ProductList);
                         if (contents && contents.length > 0) {
@@ -248,11 +253,14 @@ var name = 'Facebook',
                         return sum;
                     }, 0);
                     params['num_items'] = num_items;
-                    
-                    if (event.ProductAction.TransactionId) {
-                        params['order_id'] = event.ProductAction.TransactionId;
-                    }
 
+                    // Set product names as content_name if enabled
+                    if (sendProductNamesAsContents) {
+                        setProductNamesAsContentName(params, event.ProductAction.ProductList);
+                    }
+                    
+                    setOrderId(params, event.ProductAction.TransactionId);
+                    
                     // Build contents array for Purchase/Checkout events
                     contents = buildProductContents(event.ProductAction.ProductList);
                     if (contents && contents.length > 0) {
@@ -278,6 +286,19 @@ var name = 'Facebook',
                     }
 
                     params['value'] = totalValue;
+
+                    // Set product names as content_name if enabled
+                    if (sendProductNamesAsContents) {
+                        setProductNamesAsContentName(params, event.ProductAction.ProductList);
+                    }
+
+                    setOrderId(params, event.ProductAction.TransactionId);
+                    
+                    // Build contents array for RemoveFromCart events
+                    contents = buildProductContents(event.ProductAction.ProductList);
+                    if (contents && contents.length > 0) {
+                        params['contents'] = contents;
+                    }
 
                     fbq('trackCustom', eventName || 'customEvent', params, eventID);
                     return true;
@@ -412,6 +433,34 @@ var name = 'Facebook',
         function createEventId(event) {
             return {
                 eventID: event.SourceMessageId || null
+            }
+        }
+
+        /**
+         * Sets product names as content_name parameter
+         * @param {Object} params - The parameters object to modify
+         * @param {Array} productList - Array of products
+         */
+        function setProductNamesAsContentName(params, productList) {
+            if (productList) {
+                params['content_name'] = productList
+                    .filter(function(product) { 
+                        return product && product.Name; 
+                    })
+                    .map(function(product) { 
+                        return product.Name; 
+                    });
+            }
+        }
+
+        /**
+         * Sets order_id parameter if transaction ID exists
+         * @param {Object} params - The parameters object to modify
+         * @param {String} transactionId - The transaction ID
+         */
+        function setOrderId(params, transactionId) {
+            if (transactionId) {
+                params['order_id'] = transactionId;
             }
         }
 
