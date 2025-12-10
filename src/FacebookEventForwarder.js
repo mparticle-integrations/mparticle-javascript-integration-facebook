@@ -168,6 +168,7 @@ var name = 'Facebook',
                 var eventName,
                     totalValue,
                     contents,
+                    productNames,
                     params = cloneEventAttributes(event),
                     eventID = createEventId(event),
                     sendProductNamesAsContents = settings.sendProductNamesasContents || false;
@@ -221,7 +222,7 @@ var name = 'Facebook',
 
                         // Set product names as content_name if enabled
                         if (sendProductNamesAsContents) {
-                            var productNames = buildProductNames(event.ProductAction.ProductList);
+                            productNames = buildProductNames(event.ProductAction.ProductList);
                             if (productNames && productNames.length > 0) {
                                 params['content_name'] = productNames;
                             }
@@ -261,7 +262,7 @@ var name = 'Facebook',
 
                     // Set product names as content_name if enabled
                     if (sendProductNamesAsContents) {
-                        var productNames = buildProductNames(event.ProductAction.ProductList);
+                        productNames = buildProductNames(event.ProductAction.ProductList);
                         if (productNames && productNames.length > 0) {
                             params['content_name'] = productNames;
                         }
@@ -299,7 +300,7 @@ var name = 'Facebook',
 
                     // Set product names as content_name if enabled
                     if (sendProductNamesAsContents) {
-                        var productNames = buildProductNames(event.ProductAction.ProductList);
+                        productNames = buildProductNames(event.ProductAction.ProductList);
                         if (productNames && productNames.length > 0) {
                             params['content_name'] = productNames;
                         }
