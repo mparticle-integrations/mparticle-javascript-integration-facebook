@@ -221,10 +221,15 @@ var name = 'Facebook',
 
                         // Set product names as content_name if enabled
                         if (sendProductNamesAsContents) {
-                            setProductNamesAsContentName(params, event.ProductAction.ProductList);
+                            var productNames = buildProductNames(event.ProductAction.ProductList);
+                            if (productNames && productNames.length > 0) {
+                                params['content_name'] = productNames;
+                            }
                         }
 
-                        setOrderId(params, event.ProductAction.TransactionId);
+                        if (event.ProductAction.TransactionId) {
+                            params['order_id'] = event.ProductAction.TransactionId;
+                        }
                         
                         // Build contents array for AddToCart events
                         contents = buildProductContents(event.ProductAction.ProductList);
@@ -256,10 +261,15 @@ var name = 'Facebook',
 
                     // Set product names as content_name if enabled
                     if (sendProductNamesAsContents) {
-                        setProductNamesAsContentName(params, event.ProductAction.ProductList);
+                        var productNames = buildProductNames(event.ProductAction.ProductList);
+                        if (productNames && productNames.length > 0) {
+                            params['content_name'] = productNames;
+                        }
                     }
                     
-                    setOrderId(params, event.ProductAction.TransactionId);
+                    if (event.ProductAction.TransactionId) {
+                        params['order_id'] = event.ProductAction.TransactionId;
+                    }
                     
                     // Build contents array for Purchase/Checkout events
                     contents = buildProductContents(event.ProductAction.ProductList);
@@ -289,10 +299,15 @@ var name = 'Facebook',
 
                     // Set product names as content_name if enabled
                     if (sendProductNamesAsContents) {
-                        setProductNamesAsContentName(params, event.ProductAction.ProductList);
+                        var productNames = buildProductNames(event.ProductAction.ProductList);
+                        if (productNames && productNames.length > 0) {
+                            params['content_name'] = productNames;
+                        }
                     }
 
-                    setOrderId(params, event.ProductAction.TransactionId);
+                    if (event.ProductAction.TransactionId) {
+                        params['order_id'] = event.ProductAction.TransactionId;
+                    }
                     
                     // Build contents array for RemoveFromCart events
                     contents = buildProductContents(event.ProductAction.ProductList);
@@ -437,31 +452,22 @@ var name = 'Facebook',
         }
 
         /**
-         * Sets product names as content_name parameter
-         * @param {Object} params - The parameters object to modify
+         * Builds array of product names from product list
          * @param {Array} productList - Array of products
+         * @returns {Array} Array of product names
          */
-        function setProductNamesAsContentName(params, productList) {
-            if (productList) {
-                params['content_name'] = productList
-                    .filter(function(product) { 
-                        return product && product.Name; 
-                    })
-                    .map(function(product) { 
-                        return product.Name; 
-                    });
+        function buildProductNames(productList) {
+            if (!productList || productList.length === 0) {
+                return [];
             }
-        }
-
-        /**
-         * Sets order_id parameter if transaction ID exists
-         * @param {Object} params - The parameters object to modify
-         * @param {String} transactionId - The transaction ID
-         */
-        function setOrderId(params, transactionId) {
-            if (transactionId) {
-                params['order_id'] = transactionId;
-            }
+            
+            return productList
+                .filter(function(product) { 
+                    return product && product.Name; 
+                })
+                .map(function(product) { 
+                    return product.Name; 
+                });
         }
 
         this.init = initForwarder;
