@@ -167,7 +167,6 @@ var name = 'Facebook',
                 SupportedCommerceTypes.indexOf(event.ProductAction.ProductActionType) > -1) {
                 var eventName,
                     totalValue,
-                    contents,
                     params = cloneEventAttributes(event),
                     eventID = createEventId(event),
                     sendProductNamesAsContents = settings.sendProductNamesasContents || false;
@@ -202,6 +201,12 @@ var name = 'Facebook',
                     params['order_id'] = event.ProductAction.TransactionId;
                 }
 
+                // Build contents array
+                var contents = buildProductContents(event.ProductAction.ProductList);
+                if (contents && contents.length > 0) {
+                    params['contents'] = contents;
+                }
+
                 if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToWishlist ||
                     event.ProductAction.ProductActionType == mParticle.ProductActionType.Checkout) {
                     var eventCategory = getEventCategoryString(event);
@@ -231,12 +236,6 @@ var name = 'Facebook',
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
                         eventName = ADD_TO_CART_EVENT_NAME;
-                        
-                        // Build contents array for AddToCart events
-                        contents = buildProductContents(event.ProductAction.ProductList);
-                        if (contents && contents.length > 0) {
-                            params['contents'] = contents;
-                        }
                     }
                     else{
                         eventName = VIEW_CONTENT_EVENT_NAME;
@@ -259,12 +258,6 @@ var name = 'Facebook',
                         return sum;
                     }, 0);
                     params['num_items'] = num_items;
-                    
-                    // Build contents array for Purchase/Checkout events
-                    contents = buildProductContents(event.ProductAction.ProductList);
-                    if (contents && contents.length > 0) {
-                        params['contents'] = contents;
-                    }
                 }
                 else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.RemoveFromCart) {
                     eventName = REMOVE_FROM_CART_EVENT_NAME;
@@ -285,12 +278,6 @@ var name = 'Facebook',
                     }
 
                     params['value'] = totalValue;
-                    
-                    // Build contents array for RemoveFromCart events
-                    contents = buildProductContents(event.ProductAction.ProductList);
-                    if (contents && contents.length > 0) {
-                        params['contents'] = contents;
-                    }
 
                     fbq('trackCustom', eventName || 'customEvent', params, eventID);
                     return true;
