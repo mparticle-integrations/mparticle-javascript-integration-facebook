@@ -168,7 +168,6 @@ var name = 'Facebook',
                 var eventName,
                     totalValue,
                     contents,
-                    productNames,
                     params = cloneEventAttributes(event),
                     eventID = createEventId(event),
                     sendProductNamesAsContents = settings.sendProductNamesasContents || false;
@@ -188,6 +187,19 @@ var name = 'Facebook',
 
                 if (productSkus && productSkus.length > 0) {
                     params['content_ids'] = productSkus;
+                }
+
+                // Override content_name with product names array if setting enabled
+                if (sendProductNamesAsContents) {
+                    var productNames = buildProductNames(event.ProductAction.ProductList);
+                    if (productNames && productNames.length > 0) {
+                        params['content_name'] = productNames;
+                    }
+                }
+
+                // Set order_id if TransactionId exists
+                if (event.ProductAction.TransactionId) {
+                    params['order_id'] = event.ProductAction.TransactionId;
                 }
 
                 if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToWishlist ||
@@ -219,18 +231,6 @@ var name = 'Facebook',
                     }
                     else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToCart){
                         eventName = ADD_TO_CART_EVENT_NAME;
-
-                        // Set product names as content_name if enabled
-                        if (sendProductNamesAsContents) {
-                            productNames = buildProductNames(event.ProductAction.ProductList);
-                            if (productNames && productNames.length > 0) {
-                                params['content_name'] = productNames;
-                            }
-                        }
-
-                        if (event.ProductAction.TransactionId) {
-                            params['order_id'] = event.ProductAction.TransactionId;
-                        }
                         
                         // Build contents array for AddToCart events
                         contents = buildProductContents(event.ProductAction.ProductList);
@@ -259,18 +259,6 @@ var name = 'Facebook',
                         return sum;
                     }, 0);
                     params['num_items'] = num_items;
-
-                    // Set product names as content_name if enabled
-                    if (sendProductNamesAsContents) {
-                        productNames = buildProductNames(event.ProductAction.ProductList);
-                        if (productNames && productNames.length > 0) {
-                            params['content_name'] = productNames;
-                        }
-                    }
-                    
-                    if (event.ProductAction.TransactionId) {
-                        params['order_id'] = event.ProductAction.TransactionId;
-                    }
                     
                     // Build contents array for Purchase/Checkout events
                     contents = buildProductContents(event.ProductAction.ProductList);
@@ -297,18 +285,6 @@ var name = 'Facebook',
                     }
 
                     params['value'] = totalValue;
-
-                    // Set product names as content_name if enabled
-                    if (sendProductNamesAsContents) {
-                        productNames = buildProductNames(event.ProductAction.ProductList);
-                        if (productNames && productNames.length > 0) {
-                            params['content_name'] = productNames;
-                        }
-                    }
-
-                    if (event.ProductAction.TransactionId) {
-                        params['order_id'] = event.ProductAction.TransactionId;
-                    }
                     
                     // Build contents array for RemoveFromCart events
                     contents = buildProductContents(event.ProductAction.ProductList);

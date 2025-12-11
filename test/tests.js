@@ -695,7 +695,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
-            window.fbqObj.params.should.not.have.property('order_id');
+            window.fbqObj.params.should.have.property('order_id', 123);
             window.fbqObj.params.should.not.have.property('contents');
 
             done();
@@ -744,7 +744,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
-            window.fbqObj.params.should.not.have.property('order_id');
+            window.fbqObj.params.should.have.property('order_id', 123);
             window.fbqObj.params.should.not.have.property('contents');
 
             done();
@@ -792,7 +792,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
-            window.fbqObj.params.should.not.have.property('order_id');
+            window.fbqObj.params.should.have.property('order_id', 123);
             window.fbqObj.params.should.not.have.property('contents');
 
             done();
@@ -840,7 +840,7 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('eventAttr1', 'value1');
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
-            window.fbqObj.params.should.not.have.property('order_id');
+            window.fbqObj.params.should.have.property('order_id', 123);
             window.fbqObj.params.should.not.have.property('contents');
 
             done();
@@ -1357,6 +1357,90 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('checkout_step', 1);
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
 
+            done();
+        });
+
+        it('should log AddToWishlist event with product names as contents', function (done) {
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                sendProductNamesasContents: true
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - AddToWishlist',
+                EventCategory: CommerceEventType.ProductAddToWishlist,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.AddToWishlist,
+                    ProductList: [
+                        {
+                            Sku: 'sku-111',
+                            Name: 'Laptop',
+                            Category: 'Electronics',
+                            Brand: 'Dell',
+                            Price: 1200,
+                            Quantity: 1
+                        },
+                        {
+                            Sku: 'sku-222',
+                            Name: 'Mouse',
+                            Category: 'Accessories',
+                            Brand: 'Logitech',
+                            Price: 50,
+                            Quantity: 1
+                        }
+                    ],
+                    TransactionId: 456
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+            });
+
+            checkBasicProperties('track');
+            window.fbqObj.should.have.property('eventName', 'AddToWishlist');
+            window.fbqObj.params.should.have.property('content_name', ['Laptop', 'Mouse']);
+            window.fbqObj.params.should.have.property('order_id', 456);
+            window.fbqObj.params.should.have.property('content_ids', ['sku-111', 'sku-222']);
+            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
+            done();
+        });
+
+        it('should log ViewDetail event with product names as contents', function (done) {
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                sendProductNamesasContents: true
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - ViewDetail',
+                EventCategory: CommerceEventType.ProductViewDetail,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.ViewDetail,
+                    ProductList: [
+                        {
+                            Sku: 'sku-999',
+                            Name: 'Tablet',
+                            Category: 'Electronics',
+                            Brand: 'Samsung',
+                            Price: 800,
+                            Quantity: 1
+                        }
+                    ],
+                    TransactionId: 789
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+            });
+
+            checkBasicProperties('track');
+            window.fbqObj.should.have.property('eventName', 'ViewContent');
+            window.fbqObj.params.should.have.property('content_name', ['Tablet']);
+            window.fbqObj.params.should.have.property('order_id', 789);
+            window.fbqObj.params.should.have.property('content_ids', ['sku-999']);
+            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
             done();
         }); 
     });
