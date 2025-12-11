@@ -696,7 +696,14 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
             window.fbqObj.params.should.have.property('order_id', 123);
-            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(3);
+            window.fbqObj.params.contents[0].should.have.property('id', '12345');
+            window.fbqObj.params.contents[0].should.have.property('quantity', 2);
+            window.fbqObj.params.contents[1].should.have.property('id', '888');
+            window.fbqObj.params.contents[1].should.have.property('quantity', 1);
+            window.fbqObj.params.contents[2].should.have.property('id', '666');
+            window.fbqObj.params.contents[2].should.have.property('quantity', 1);
 
             done();
         });
@@ -745,7 +752,10 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
             window.fbqObj.params.should.have.property('order_id', 123);
-            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(1);
+            window.fbqObj.params.contents[0].should.have.property('id', '12345');
+            window.fbqObj.params.contents[0].should.have.property('quantity', 1);
 
             done();
         });
@@ -793,7 +803,10 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
             window.fbqObj.params.should.have.property('order_id', 123);
-            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(1);
+            window.fbqObj.params.contents[0].should.have.property('id', '145');
+            window.fbqObj.params.contents[0].should.have.property('quantity', 1);
 
             done();
         });
@@ -841,7 +854,10 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('eventAttr2', 'value2');
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
             window.fbqObj.params.should.have.property('order_id', 123);
-            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(1);
+            window.fbqObj.params.contents[0].should.have.property('id', '12345');
+            window.fbqObj.params.contents[0].should.have.property('quantity', 1);
 
             done();
         });
@@ -1139,6 +1155,124 @@ describe('Facebook Forwarder', function () {
             done();
         });
 
+        it('should build contents array with mapped attributes for AddToWishlist events', function (done) {
+            // Initialize with product attribute mapping
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                "productAttributeMapping":"[{&quot;jsmap&quot;:&quot;3373707&quot;,&quot;map&quot;:&quot;Name&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_name&quot;},{&quot;jsmap&quot;:&quot;93997959&quot;,&quot;map&quot;:&quot;Brand&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_brand&quot;},{&quot;jsmap&quot;:&quot;106934601&quot;,&quot;map&quot;:&quot;Price&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_price&quot;},{&quot;jsmap&quot;:&quot;50511102&quot;,&quot;map&quot;:&quot;Category&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_category&quot;},{&quot;jsmap&quot;:&quot;94842723&quot;,&quot;map&quot;:&quot;category&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_attribute_category&quot;}]"
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - AddToWishlist',
+                EventCategory: CommerceEventType.ProductAddToWishlist,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.AddToWishlist,
+                    ProductList: [
+                        {
+                            Sku: 'wishlist-sku',
+                            Name: 'Designer Bag',
+                            Category: 'Accessories',
+                            Brand: 'Gucci',
+                            Variant: 'Black',
+                            Price: 2500,
+                            Quantity: 1,
+                            Attributes: {
+                                category: 'luxury'
+                            }
+                        }
+                    ],
+                    TransactionId: 789
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+            });
+
+            checkBasicProperties('track');
+            window.fbqObj.should.have.property('eventName', 'AddToWishlist');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(1);
+            window.fbqObj.params.should.have.property('order_id', 789);
+            
+            var firstProduct = window.fbqObj.params.contents[0];
+            // Standard Facebook fields
+            firstProduct.should.have.property('id', 'wishlist-sku');
+            firstProduct.should.have.property('name', 'Designer Bag');
+            firstProduct.should.have.property('brand', 'Gucci');
+            firstProduct.should.have.property('item_price', 2500);
+            firstProduct.should.have.property('quantity', 1);
+            
+            // Mapped standard fields
+            firstProduct.should.have.property('custom_name', 'Designer Bag');
+            firstProduct.should.have.property('custom_brand', 'Gucci');
+            firstProduct.should.have.property('custom_price', 2500);
+            firstProduct.should.have.property('custom_category', 'Accessories');
+            
+            // Mapped custom attribute
+            firstProduct.should.have.property('custom_attribute_category', 'luxury');
+
+            done();
+        });
+
+        it('should build contents array with mapped attributes for ViewDetail events', function (done) {
+            // Initialize with product attribute mapping
+            mParticle.forwarder.init({
+                pixelCode: 'test-pixel-code',
+                "productAttributeMapping":"[{&quot;jsmap&quot;:&quot;3373707&quot;,&quot;map&quot;:&quot;Name&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_name&quot;},{&quot;jsmap&quot;:&quot;93997959&quot;,&quot;map&quot;:&quot;Brand&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_brand&quot;},{&quot;jsmap&quot;:&quot;106934601&quot;,&quot;map&quot;:&quot;Price&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_price&quot;},{&quot;jsmap&quot;:&quot;50511102&quot;,&quot;map&quot;:&quot;Category&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_category&quot;},{&quot;jsmap&quot;:&quot;94842723&quot;,&quot;map&quot;:&quot;category&quot;,&quot;maptype&quot;:&quot;ProductAttributeSelector.Name&quot;,&quot;value&quot;:&quot;custom_attribute_category&quot;}]"
+            }, reportService.cb, true);
+
+            mParticle.forwarder.process({
+                EventName: 'eCommerce - ViewDetail',
+                EventCategory: CommerceEventType.ProductViewDetail,
+                EventDataType: MessageType.Commerce,
+                ProductAction: {
+                    ProductActionType: ProductActionType.ViewDetail,
+                    ProductList: [
+                        {
+                            Sku: 'view-sku-999',
+                            Name: 'Laptop Pro',
+                            Category: 'Electronics',
+                            Brand: 'Apple',
+                            Variant: '16-inch',
+                            Price: 3000,
+                            Quantity: 1,
+                            Attributes: {
+                                category: 'computers'
+                            }
+                        }
+                    ],
+                    TransactionId: 999
+                },
+                CurrencyCode: 'USD',
+                SourceMessageId: SOURCE_MESSAGE_ID,
+            });
+
+            checkBasicProperties('track');
+            window.fbqObj.should.have.property('eventName', 'ViewContent');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(1);
+            window.fbqObj.params.should.have.property('order_id', 999);
+            
+            var firstProduct = window.fbqObj.params.contents[0];
+            // Standard Facebook fields
+            firstProduct.should.have.property('id', 'view-sku-999');
+            firstProduct.should.have.property('name', 'Laptop Pro');
+            firstProduct.should.have.property('brand', 'Apple');
+            firstProduct.should.have.property('item_price', 3000);
+            firstProduct.should.have.property('quantity', 1);
+            
+            // Mapped standard fields
+            firstProduct.should.have.property('custom_name', 'Laptop Pro');
+            firstProduct.should.have.property('custom_brand', 'Apple');
+            firstProduct.should.have.property('custom_price', 3000);
+            firstProduct.should.have.property('custom_category', 'Electronics');
+            
+            // Mapped custom attribute
+            firstProduct.should.have.property('custom_attribute_category', 'computers');
+
+            done();
+        });
+
         it('should log Purchase event with product names as contents', function (done) {
             mParticle.forwarder.init({
                 pixelCode: 'test-pixel-code',
@@ -1401,7 +1535,12 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_name', ['Laptop', 'Mouse']);
             window.fbqObj.params.should.have.property('order_id', 456);
             window.fbqObj.params.should.have.property('content_ids', ['sku-111', 'sku-222']);
-            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(2);
+            window.fbqObj.params.contents[0].should.have.property('id', 'sku-111');
+            window.fbqObj.params.contents[0].should.have.property('quantity', 1);
+            window.fbqObj.params.contents[1].should.have.property('id', 'sku-222');
+            window.fbqObj.params.contents[1].should.have.property('quantity', 1);
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
             done();
         });
@@ -1439,7 +1578,10 @@ describe('Facebook Forwarder', function () {
             window.fbqObj.params.should.have.property('content_name', ['Tablet']);
             window.fbqObj.params.should.have.property('order_id', 789);
             window.fbqObj.params.should.have.property('content_ids', ['sku-999']);
-            window.fbqObj.params.should.not.have.property('contents');
+            window.fbqObj.params.should.have.property('contents');
+            window.fbqObj.params.contents.length.should.equal(1);
+            window.fbqObj.params.contents[0].should.have.property('id', 'sku-999');
+            window.fbqObj.params.contents[0].should.have.property('quantity', 1);
             window.fbqObj.eventData.should.have.property('eventID', SOURCE_MESSAGE_ID);
             done();
         }); 
