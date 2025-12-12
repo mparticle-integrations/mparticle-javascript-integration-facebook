@@ -10,6 +10,11 @@
         "dist/FacebookEventForwarder.common.js",
         "dist/FacebookEventForwarder.esm.js"
     ],
+    "publishConfig": {
+        "access": "public",
+        "provenance": true,
+        "registry": "https://registry.npmjs.org"
+    },
     "repository": "https://github.com/mparticle-integrations/mparticle-javascript-integration-facebook",
     "scripts": {
         "build": "rollup --config rollup.config.js",
@@ -19,12 +24,10 @@
     "devDependencies": {
         "@mparticle/web-sdk": "^2.50.0",
         "@semantic-release/changelog": "^6.0.3",
-        "@semantic-release/exec": "^6.0.0",
+        "@semantic-release/exec": "^6.0.3",
         "@semantic-release/git": "^10.0.1",
-        "@semantic-release/commit-analyzer": "^10.0.0",
-        "@semantic-release/github": "^11.0.0",
-        "@semantic-release/npm": "^10.0.0",
-        "@semantic-release/release-notes-generator": "^14.0.0",
+        "@semantic-release/npm": "^13.1.2",
+        "semantic-release": "^24.2.0",
         "chai": "^4.2.0",
         "karma": "^5.1.0",
         "karma-chai": "^0.1.0",
