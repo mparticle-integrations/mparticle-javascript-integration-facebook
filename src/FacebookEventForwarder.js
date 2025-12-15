@@ -165,11 +165,12 @@ var name = 'Facebook',
                 event.ProductAction.ProductList &&
                 event.ProductAction.ProductActionType &&
                 SupportedCommerceTypes.indexOf(event.ProductAction.ProductActionType) > -1) {
-
                 var eventName,
                     totalValue,
                     params = cloneEventAttributes(event),
-                    eventID = createEventId(event);
+                    eventID = createEventId(event),
+                    sendProductNamesAsContents = settings.sendProductNamesasContents || false;
+
                 params['currency'] = event.CurrencyCode || 'USD';
 
                 if (event.EventName) {
@@ -185,6 +186,25 @@ var name = 'Facebook',
 
                 if (productSkus && productSkus.length > 0) {
                     params['content_ids'] = productSkus;
+                }
+
+                // Override content_name with product names array if setting enabled
+                if (sendProductNamesAsContents) {
+                    var productNames = buildProductNames(event.ProductAction.ProductList);
+                    if (productNames && productNames.length > 0) {
+                        params['content_name'] = productNames;
+                    }
+                }
+
+                // Set order_id if TransactionId exists
+                if (event.ProductAction.TransactionId) {
+                    params['order_id'] = event.ProductAction.TransactionId;
+                }
+
+                // Build contents array
+                var contents = buildProductContents(event.ProductAction.ProductList);
+                if (contents && contents.length > 0) {
+                    params['contents'] = contents;
                 }
 
                 if (event.ProductAction.ProductActionType == mParticle.ProductActionType.AddToWishlist ||
@@ -238,18 +258,6 @@ var name = 'Facebook',
                         return sum;
                     }, 0);
                     params['num_items'] = num_items;
-                    
-                    if (event.ProductAction.TransactionId) {
-                        params['order_id'] = event.ProductAction.TransactionId;
-                    }
-
-                    // Build contents array for Purchase events
-                    if (event.ProductAction.ProductActionType == mParticle.ProductActionType.Purchase) {
-                        var contents = buildProductContents(event.ProductAction.ProductList);
-                        if (contents && contents.length > 0) {
-                            params['contents'] = contents;
-                        }
-                    }
                 }
                 else if (event.ProductAction.ProductActionType == mParticle.ProductActionType.RemoveFromCart) {
                     eventName = REMOVE_FROM_CART_EVENT_NAME;
@@ -405,6 +413,25 @@ var name = 'Facebook',
             return {
                 eventID: event.SourceMessageId || null
             }
+        }
+
+        /**
+         * Builds array of product names from product list
+         * @param {Array} productList - Array of products
+         * @returns {Array} Array of product names
+         */
+        function buildProductNames(productList) {
+            if (!productList || productList.length === 0) {
+                return [];
+            }
+            
+            return productList
+                .filter(function(product) { 
+                    return product && product.Name; 
+                })
+                .map(function(product) { 
+                    return product.Name; 
+                });
         }
 
         this.init = initForwarder;
