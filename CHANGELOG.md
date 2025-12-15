@@ -1,3 +1,15 @@
+# [2.3.0](https://github.com/mparticle-integrations/mparticle-javascript-integration-facebook/compare/v2.2.0...v2.3.0) (2025-12-15)
+
+
+### Bug Fixes
+
+* indentation in FacebookEventForwarder.js ([#58](https://github.com/mparticle-integrations/mparticle-javascript-integration-facebook/issues/58)) ([9cf4a60](https://github.com/mparticle-integrations/mparticle-javascript-integration-facebook/commit/9cf4a604727de75086ec1c4f8e1b7f93a29fef2b))
+
+
+### Features
+
+* Support sendProductNamesAsContents, extend order_id and contents to all eCommerce events ([#61](https://github.com/mparticle-integrations/mparticle-javascript-integration-facebook/issues/61)) ([2dd1079](https://github.com/mparticle-integrations/mparticle-javascript-integration-facebook/commit/2dd1079614718395b02ca5deb8529bc0f2ac7cfb))
+
 # [2.2.0](https://github.com/mparticle-integrations/mparticle-javascript-integration-facebook/compare/v2.1.0...v2.2.0) (2025-11-13)
 
 
